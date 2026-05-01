@@ -10,12 +10,12 @@ This project implements a side-by-side comparison of a traditional RAG pipeline 
 
 ## Project Structure
 * `data/`: Contains the generated 6 CSV files (3 Node files, 3 Edge files) that map the dataset structurally.
-* `src/`: Python source code, including `generate_graph.py` which generates the test dataset and relationship map.
+* `src/`: Python source code, including `parse_repo.py` which parses a massive real-world Python repository and injects our target logic bomb lineage.
 
 ## Usage
-To regenerate the graph data:
+To regenerate the graph data (requires the target repo cloned in `data/langchain_repo`):
 ```bash
-python src/generate_graph.py
+python3 src/parse_repo.py
 ```
 
 ## The Core Argument
