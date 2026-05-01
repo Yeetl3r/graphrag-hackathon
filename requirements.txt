@@ -1,1 +1,13 @@
-# No external requirements yet
+streamlit
+langchain
+langchain-community
+langchain-huggingface
+huggingface_hub
+chromadb
+sentence-transformers
+evaluate
+bert_score
+streamlit-agraph
+pyTigerGraph
+python-dotenv
+pandas
