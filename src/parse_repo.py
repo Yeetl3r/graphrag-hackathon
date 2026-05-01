@@ -54,10 +54,13 @@ def parse_repo(repo_path, output_dir):
                         
                     def visit_FunctionDef(self, node):
                         func_node_id = f"FUNC_{uuid.uuid5(uuid.NAMESPACE_URL, rel_path + ':' + node.name).hex[:8]}"
+                        code_snippet = ast.get_source_segment(source, node)
+                        if not code_snippet:
+                            code_snippet = ""
                         self.functions_in_file.append({
                             'id': func_node_id,
                             'name': node.name,
-                            'lineno': node.lineno
+                            'code': code_snippet
                         })
                         
                         edges_resides_in.append({
@@ -156,9 +159,9 @@ def parse_repo(repo_path, output_dir):
     
     # 1. Add Synthetic Functions
     bomb_funcs = [
-        {'id': 'FUNC_amx_vectorize', 'name': 'amx_vectorize', 'lineno': -1},
-        {'id': 'FUNC_tensor_precision_cast', 'name': 'tensor_precision_cast', 'lineno': -1},
-        {'id': 'FUNC_orchestrate_thinking_mode', 'name': 'orchestrate_thinking_mode', 'lineno': -1}
+        {'id': 'FUNC_amx_vectorize', 'name': 'amx_vectorize', 'code': 'def amx_vectorize(data):\n    return tensor_precision_cast(data)'},
+        {'id': 'FUNC_tensor_precision_cast', 'name': 'tensor_precision_cast', 'code': 'def tensor_precision_cast(data):\n    return orchestrate_thinking_mode(data)'},
+        {'id': 'FUNC_orchestrate_thinking_mode', 'name': 'orchestrate_thinking_mode', 'code': 'def orchestrate_thinking_mode(data):\n    # INJECTS_CONTEXT: SYS_PROMPT_SNR_GATE\n    pass'}
     ]
     nodes_functions.extend(bomb_funcs)
     
@@ -231,7 +234,7 @@ def parse_repo(repo_path, output_dir):
             writer.writerows(data)
             
     write_csv('Nodes_Files.csv', ['id', 'path', 'content'], nodes_files)
-    write_csv('Nodes_Functions.csv', ['id', 'name', 'lineno'], nodes_functions)
+    write_csv('Nodes_Functions.csv', ['id', 'name', 'code'], nodes_functions)
     write_csv('Nodes_Prompts.csv', ['id', 'content'], nodes_prompts)
     
     write_csv('Edges_Calls.csv', ['source', 'target', 'type'], resolved_calls)
