@@ -248,7 +248,8 @@ def parse_repo(repo_path, output_dir):
     print(f"InjectsContext: {len(edges_injects_context)}")
 
 if __name__ == "__main__":
-    repo_path = "data/langchain_repo/libs/langchain" # Let's target the core libs/langchain to avoid infinite parsing, but it will be massive
+    # We need to hit 2 million tokens, so we parse all of libs/
+    repo_path = "data/langchain_repo/libs" 
     # Check if that exists, if not just data/langchain_repo
     if not os.path.exists(repo_path):
         repo_path = "data/langchain_repo"
