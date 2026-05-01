@@ -63,8 +63,9 @@ def run_llm_only(query: str, hf_token: str) -> str:
     """Run LLM-Only Baseline (Zero Context)"""
     client = InferenceClient("meta-llama/Meta-Llama-3.1-8B-Instruct", token=hf_token)
     prompt = f"User Query: {query}\n\nTrace the exact lineage and provide your analysis."
-    response = client.text_generation(prompt, max_new_tokens=500)
-    return response
+    messages = [{"role": "user", "content": prompt}]
+    response = client.chat_completion(messages, max_tokens=500)
+    return response.choices[0].message.content
 
 def run_vector_rag(query: str, hf_token: str) -> str:
     """Run Basic Vector RAG Baseline"""
@@ -74,8 +75,9 @@ def run_vector_rag(query: str, hf_token: str) -> str:
     
     client = InferenceClient("meta-llama/Meta-Llama-3.1-8B-Instruct", token=hf_token)
     prompt = f"Context:\n{context}\n\nUser Query: {query}\n\nAnswer the user query based ONLY on the provided context."
-    response = client.text_generation(prompt, max_new_tokens=500)
-    return response
+    messages = [{"role": "user", "content": prompt}]
+    response = client.chat_completion(messages, max_tokens=500)
+    return response.choices[0].message.content
 
 if __name__ == "__main__":
     if not os.path.exists(CHROMA_DB_DIR):

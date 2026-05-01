@@ -65,7 +65,9 @@ def run_graph_rag(query: str, hf_token: str):
         from huggingface_hub import InferenceClient
         client = InferenceClient("meta-llama/Meta-Llama-3.1-8B-Instruct", token=hf_token)
         prompt = f"Graph Context:\n{context}\n\nUser Query: {query}\n\nTrace the lineage based ONLY on the provided graph context."
-        response = client.text_generation(prompt, max_new_tokens=500)
+        messages = [{"role": "user", "content": prompt}]
+        response = client.chat_completion(messages, max_tokens=500)
+        response_text = response.choices[0].message.content
         
         # Graph nodes for visualization
         graph_data = [
@@ -76,7 +78,7 @@ def run_graph_rag(query: str, hf_token: str):
             {"source": "orchestrate_thinking_mode", "target": "SYS_PROMPT_SNR_GATE"}
         ]
         
-        return response, graph_data
+        return response_text, graph_data
     except Exception as e:
         return f"TigerGraph Query Error: {e}", []
 

@@ -41,7 +41,9 @@ def llm_as_a_judge(response: str, hf_token: str) -> bool:
     """
     
     try:
-        judge_response = client.text_generation(prompt, max_new_tokens=10).strip().upper()
+        messages = [{"role": "user", "content": prompt}]
+        judge_response_obj = client.chat_completion(messages, max_tokens=10)
+        judge_response = judge_response_obj.choices[0].message.content.strip().upper()
         return "PASS" in judge_response
     except Exception as e:
         print(f"Error in LLM-as-a-judge: {e}")
