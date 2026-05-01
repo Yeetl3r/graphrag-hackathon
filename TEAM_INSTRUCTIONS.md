@@ -89,4 +89,3 @@ Keep this narrative in mind for everything you build. Every feature should point
 2. **Update `requirements.txt`:** As you add libraries (e.g., `streamlit`, `langchain`, `pyTigerGraph`), add them to the requirements file and commit.
 3. **Branching:** Work on your own branches (e.g., `git checkout -b feature/baseline-rag`) and merge into `main` via Pull Requests to avoid merge conflicts. 
 
-Let's build this! 🚀
