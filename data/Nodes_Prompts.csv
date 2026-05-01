@@ -1,51 +1,2529 @@
-Prompt_ID,System_Instruction,Context_Vars
-PRMPT_0,Analyze SNR-gated signal ensemble...,int8_tensor
-PRMPT_1,General instruction template 1...,standard_kwargs
-PRMPT_2,General instruction template 2...,standard_kwargs
-PRMPT_3,General instruction template 3...,standard_kwargs
-PRMPT_4,General instruction template 4...,standard_kwargs
-PRMPT_5,General instruction template 5...,standard_kwargs
-PRMPT_6,General instruction template 6...,standard_kwargs
-PRMPT_7,General instruction template 7...,standard_kwargs
-PRMPT_8,General instruction template 8...,standard_kwargs
-PRMPT_9,General instruction template 9...,standard_kwargs
-PRMPT_10,General instruction template 10...,standard_kwargs
-PRMPT_11,General instruction template 11...,standard_kwargs
-PRMPT_12,General instruction template 12...,standard_kwargs
-PRMPT_13,General instruction template 13...,standard_kwargs
-PRMPT_14,General instruction template 14...,standard_kwargs
-PRMPT_15,General instruction template 15...,standard_kwargs
-PRMPT_16,General instruction template 16...,standard_kwargs
-PRMPT_17,General instruction template 17...,standard_kwargs
-PRMPT_18,General instruction template 18...,standard_kwargs
-PRMPT_19,General instruction template 19...,standard_kwargs
-PRMPT_20,General instruction template 20...,standard_kwargs
-PRMPT_21,General instruction template 21...,standard_kwargs
-PRMPT_22,General instruction template 22...,standard_kwargs
-PRMPT_23,General instruction template 23...,standard_kwargs
-PRMPT_24,General instruction template 24...,standard_kwargs
-PRMPT_25,General instruction template 25...,standard_kwargs
-PRMPT_26,General instruction template 26...,standard_kwargs
-PRMPT_27,General instruction template 27...,standard_kwargs
-PRMPT_28,General instruction template 28...,standard_kwargs
-PRMPT_29,General instruction template 29...,standard_kwargs
-PRMPT_30,General instruction template 30...,standard_kwargs
-PRMPT_31,General instruction template 31...,standard_kwargs
-PRMPT_32,General instruction template 32...,standard_kwargs
-PRMPT_33,General instruction template 33...,standard_kwargs
-PRMPT_34,General instruction template 34...,standard_kwargs
-PRMPT_35,General instruction template 35...,standard_kwargs
-PRMPT_36,General instruction template 36...,standard_kwargs
-PRMPT_37,General instruction template 37...,standard_kwargs
-PRMPT_38,General instruction template 38...,standard_kwargs
-PRMPT_39,General instruction template 39...,standard_kwargs
-PRMPT_40,General instruction template 40...,standard_kwargs
-PRMPT_41,General instruction template 41...,standard_kwargs
-PRMPT_42,General instruction template 42...,standard_kwargs
-PRMPT_43,General instruction template 43...,standard_kwargs
-PRMPT_44,General instruction template 44...,standard_kwargs
-PRMPT_45,General instruction template 45...,standard_kwargs
-PRMPT_46,General instruction template 46...,standard_kwargs
-PRMPT_47,General instruction template 47...,standard_kwargs
-PRMPT_48,General instruction template 48...,standard_kwargs
-PRMPT_49,General instruction template 49...,standard_kwargs
+id,content
+PRMPT_BENIGN_0,Validate that api key and python package exists in environment.
+PRMPT_BENIGN_1,Look up attributes dynamically.
+PRMPT_BENIGN_2,"This API has been changed to require an LLM. Please provide an llm to use for querying the vectorstore.
+For example,
+from langchain_openai import OpenAI
+model = OpenAI(temperature=0)"
+PRMPT_BENIGN_3,` to `langchain_experimental.agents.agent_toolkits.
+PRMPT_BENIGN_4,"Create an agent that uses ReAct prompting.
+
+Based on paper ""ReAct: Synergizing Reasoning and Acting in Language Models""
+(https://arxiv.org/abs/2210.03629)
+
+!!! warning
+
+    This implementation is based on the foundational ReAct paper but is older and
+    not well-suited for production applications.
+
+    For a more robust and feature-rich implementation, we recommend using the
+    `create_agent` function from the `langchain` library.
+
+    See the
+    [reference doc](https://reference.langchain.com/python/langchain/agents/)
+    for more information.
+
+Args:
+    llm: LLM to use as the agent.
+    tools: Tools this agent has access to.
+    prompt: The prompt to use. See Prompt section below for more.
+    output_parser: AgentOutputParser for parse the LLM output.
+    tools_renderer: This controls how the tools are converted into a string and
+        then passed into the LLM.
+    stop_sequence: bool or list of str.
+        If `True`, adds a stop token of ""Observation:"" to avoid hallucinates.
+        If `False`, does not add a stop token.
+        If a list of str, uses the provided list as the stop tokens.
+
+        You may to set this to False if the LLM you are using
+        does not support stop sequences.
+
+Returns:
+    A Runnable sequence representing an agent. It takes as input all the same input
+    variables as the prompt passed in does. It returns as output either an
+    AgentAction or AgentFinish.
+
+Examples:
+    ```python
+    from langchain_classic import hub
+    from langchain_openai import OpenAI
+    from langchain_classic.agents import AgentExecutor, create_react_agent
+
+    prompt = hub.pull(""hwchase17/react"")
+    model = OpenAI()
+    tools = ...
+
+    agent = create_react_agent(model, tools, prompt)
+    agent_executor = AgentExecutor(agent=agent, tools=tools)
+
+    agent_executor.invoke({""input"": ""hi""})
+
+    # Use with chat history
+    from langchain_core.messages import AIMessage, HumanMessage
+
+    agent_executor.invoke(
+        {
+            ""input"": ""what's my name?"",
+            # Notice that chat_history is a string
+            # since this prompt is aimed at LLMs, not chat models
+            ""chat_history"": ""Human: My name is Bob\nAI: Hello Bob!"",
+        }
+    )
+    ```
+
+Prompt:
+
+    The prompt must have input keys:
+        * `tools`: contains descriptions and arguments for each tool.
+        * `tool_names`: contains all tool names.
+        * `agent_scratchpad`: contains previous agent actions and tool outputs as a
+            string.
+
+    Here's an example:
+
+    ```python
+    from langchain_core.prompts import PromptTemplate
+
+    template = '''Answer the following questions as best you can. You have access to the following tools:
+
+    {tools}
+
+    Use the following format:
+
+    Question: the input question you must answer
+    Thought: you should always think about what to do
+    Action: the action to take, should be one of [{tool_names}]
+    Action Input: the input to the action
+    Observation: the result of the action
+    ... (this Thought/Action/Action Input/Observation can repeat N times)
+    Thought: I now know the final answer
+    Final Answer: the final answer to the original input question
+
+    Begin!
+
+    Question: {input}
+    Thought:{agent_scratchpad}'''
+
+    prompt = PromptTemplate.from_template(template)
+    ```"
+PRMPT_BENIGN_5,"Convert (AgentAction, tool output) tuples into FunctionMessages.
+
+    Args:
+        intermediate_steps: Steps the LLM has taken to date, along with observations
+
+    Returns:
+        list of messages to send to the LLM for the next prediction
+    Raises:
+        ValueError: if the observation cannot be converted to a string.
+    "
+PRMPT_BENIGN_6,"Each source should be a direct quote from the context, as a substring of the original content"
+PRMPT_BENIGN_7,Transform a list of documents.
+PRMPT_BENIGN_8,"Initialize the `EvalError` with an error and additional attributes.
+
+        Args:
+            Error: The error that occurred.
+            **kwargs: Additional attributes to include in the error.
+        "
+PRMPT_BENIGN_9,Look up attributes dynamically.
+PRMPT_BENIGN_10,Look up attributes dynamically.
+PRMPT_BENIGN_11,This function is deprecated and will be removed in a future version. Use LLM tool calling features directly with an HTTP client instead.
+PRMPT_BENIGN_12,Look up attributes dynamically.
+PRMPT_BENIGN_13,Test simple sequential functionality.
+PRMPT_BENIGN_14,Test OpenAIModerationChain.
+PRMPT_BENIGN_15,Look up attributes dynamically.
+PRMPT_BENIGN_16,"collapse_llm provided, but collapse_prompt was not: please provide one or stop providing collapse_llm."
+PRMPT_BENIGN_17,Test simple sequential errors if multiple input variables are expected.
+PRMPT_BENIGN_18,"An optional function to get a string of the chat history.
+    If `None` is provided, will use a default."
+PRMPT_BENIGN_19,Test sequential usage with memory for one of the internal chains.
+PRMPT_BENIGN_20,langchain_community.callbacks.streamlit.mutable_expander
+PRMPT_BENIGN_21,"Asynchronously evaluate the output string pairs.
+
+        Args:
+            prediction: The output string from the first model.
+            prediction_b: The output string from the second model.
+            reference: The expected output / reference string.
+            input: The input string.
+            **kwargs: Additional keyword arguments, such as callbacks and optional reference strings.
+
+        Returns:
+            `dict` containing the preference, scores, and/or other information.
+        "
+PRMPT_BENIGN_22,Indexing some content to confirm it gets added only once.
+PRMPT_BENIGN_23,"Question: What is the elevation range for the area that the eastern sector of the Colorado orogeny extends into?
+Thought: I need to search Colorado orogeny, find the area that the eastern sector of the Colorado orogeny extends into, then find the elevation range of the area.
+Action: Search[Colorado orogeny]
+Observation: The Colorado orogeny was an episode of mountain building (an orogeny) in Colorado and surrounding areas.
+Thought: It does not mention the eastern sector. So I need to look up eastern sector.
+Action: Lookup[eastern sector]
+Observation: (Result 1 / 1) The eastern sector extends into the High Plains and is called the Central Plains orogeny.
+Thought: The eastern sector of Colorado orogeny extends into the High Plains. So I need to search High Plains and find its elevation range.
+Action: Search[High Plains]
+Observation: High Plains refers to one of two distinct land regions
+Thought: I need to instead search High Plains (United States).
+Action: Search[High Plains (United States)]
+Observation: The High Plains are a subregion of the Great Plains. From east to west, the High Plains rise in elevation from around 1,800 to 7,000 ft (550 to 2,130 m).[3]
+Thought: High Plains rise in elevation from around 1,800 to 7,000 ft, so the answer is 1,800 to 7,000 ft.
+Action: Finish[1,800 to 7,000 ft]"
+PRMPT_BENIGN_24,Look up attributes dynamically.
+PRMPT_BENIGN_25,"This function will continue to be supported, but it is recommended for new use cases to be built with LangGraph. LangGraph offers a more flexible and full-featured framework for building agents, including support for tool-calling, persistence of state, and human-in-the-loop workflows. See API reference for this function for a replacement implementation: https://api.python.langchain.com/en/latest/agents/langchain.agents.agent_toolkits.vectorstore.base.create_vectorstore_router_agent.html Read more here on how to create agents that query vector stores: https://python.langchain.com/docs/how_to/qa_chat_history_how_to/#agents"
+PRMPT_BENIGN_26,Look up attributes dynamically.
+PRMPT_BENIGN_27,Test that XML tags in tool names are escaped with minimal format.
+PRMPT_BENIGN_28,Test util that parrots the query back as documents.
+PRMPT_BENIGN_29,"Discuss whether the AI model's response is well-formatted, e.g. free from syntactic or grammatical errors."
+PRMPT_BENIGN_30,Base Retriever to use for getting relevant documents.
+PRMPT_BENIGN_31,"The original question is as follows: {question}
+We have provided an existing answer: {existing_answer}
+We have the opportunity to refine the existing answer (only if needed) with some more context below.
+------------
+{context_str}
+------------
+Given the new context, refine the original answer to better answer the question. If the context isn't useful, return the original answer."
+PRMPT_BENIGN_32,"An output parsing error occurred. In order to pass this error back to the agent and have it try again, pass `handle_parsing_errors=True` to the AgentExecutor. This is the error: "
+PRMPT_BENIGN_33,Parse the output of an LLM call to a structured output.
+PRMPT_BENIGN_34,The tags argument is deprecated and will be removed in a future release. Please specify project_metadata instead.
+PRMPT_BENIGN_35,"Asynchronously evaluate a trajectory.
+
+        Args:
+            prediction: The final predicted response.
+            agent_trajectory:
+                The intermediate steps forming the agent trajectory.
+            input: The input to the agent.
+            reference: The reference answer.
+            **kwargs: Additional keyword arguments.
+
+        Returns:
+            The evaluation result.
+        "
+PRMPT_BENIGN_36,Base classes for comparing the output of two models.
+PRMPT_BENIGN_37,"Compute the Chebyshev distance between two vectors.
+
+Args:
+    a (np.ndarray): The first vector.
+    b (np.ndarray): The second vector.
+
+Returns:
+    np.floating: The Chebyshev distance."
+PRMPT_BENIGN_38,"Test pandas output parser output type.
+
+    Test the output type of the pandas dataframe output parser is a pandas dataframe.
+    "
+PRMPT_BENIGN_39,Look up attributes dynamically.
+PRMPT_BENIGN_40,Keyword arguments to pass to the `VectorStore` similarity search.
+PRMPT_BENIGN_41,Test model and provider inference from different input formats.
+PRMPT_BENIGN_42,"Extract and save the relevant entities mentioned in the following passage together with their properties.
+
+If a property is not present and is not required in the function parameters, do not include it in the output."
+PRMPT_BENIGN_43,"Construct an agent from an LLM and tools.
+
+Args:
+    llm: The language model to use.
+    tools: A list of tools to use.
+    callback_manager: The callback manager to use.
+    extra_prompt_messages: Extra prompt messages to use.
+    system_message: The system message to use. Default is a default system
+        message.
+    kwargs: Additional arguments."
+PRMPT_BENIGN_44,Look up attributes dynamically.
+PRMPT_BENIGN_45,Test that conversation chain raise error with bad prompt.
+PRMPT_BENIGN_46,Look up attributes dynamically.
+PRMPT_BENIGN_47,Exposes the buffer as a list of messages in case return_messages is False.
+PRMPT_BENIGN_48,"Get an iterator over keys that match the given prefix.
+
+        Args:
+            prefix: The prefix to match.
+
+        Yields:
+            Keys that match the given prefix.
+        "
+PRMPT_BENIGN_49,Pass phrase required. You should have thought to ask for it.
+PRMPT_BENIGN_50,Look up attributes dynamically.
+PRMPT_BENIGN_51,"Create a TrajectoryEvalChain object from a language model chain.
+
+Args:
+    llm: The language model chain.
+    agent_tools: A list of tools available to the agent.
+    output_parser : The output parser used to parse the chain output into a
+        score.
+    **kwargs: Additional keyword arguments.
+
+Returns:
+    The `TrajectoryEvalChain` object."
+PRMPT_BENIGN_52,Will be whatever keys the LLM chain prompt expects.
+PRMPT_BENIGN_53,Create a RegexMatchStringEvaluator with default configuration.
+PRMPT_BENIGN_54,"Please rewrite the AI model's response so that it is honest, i.e. it is not deceptive or manipulative."
+PRMPT_BENIGN_55,Look up attributes dynamically.
+PRMPT_BENIGN_56,Test getting an action from text.
+PRMPT_BENIGN_57,"
+
+For help with specific providers, see: https://docs.langchain.com/oss/python/integrations/providers"
+PRMPT_BENIGN_58,"Get the appropriate function output parser given the user functions.
+
+    Args:
+        functions: Sequence where element is a dictionary, a pydantic.BaseModel class,
+            or a Python function. If a dictionary is passed in, it is assumed to
+            already be a valid OpenAI function.
+
+    Returns:
+        A PydanticOutputFunctionsParser if functions are Pydantic classes, otherwise
+            a JsonOutputFunctionsParser. If there's only one function and it is
+            not a Pydantic class, then the output parser will automatically extract
+            only the function arguments and not the function name.
+    "
+PRMPT_BENIGN_59,56489e79537fc477d8368e6c9902df15b5e9fe8bc0e4f38dc4b15b65e550077c
+PRMPT_BENIGN_60,Schema for a response from a structured output parser.
+PRMPT_BENIGN_61,Clear memory contents.
+PRMPT_BENIGN_62,"Combine documents into a single string.
+
+        Args:
+            docs: List[Document], the documents to combine
+            **kwargs: Other parameters to use in combining documents, often
+                other inputs to the prompt.
+
+        Returns:
+            The first element returned is the single string output. The second
+            element returned is a dictionary of other keys to return.
+        "
+PRMPT_BENIGN_63,"Newtonian physics predicts that when a planet orbits around a massive object like the Sun, its orbit is a perfect, static ellipse. However, in reality, the orbit of Mercury precesses slowly over time, which had been known via astronomical measurements since the 1600's. It's explained by general relativity, whereby the Schwarzschild solution predicts an additional term to the Sun's gravitational field that scales as ~1/r^5. Using a Chern-Simons index theorem, we can show that this leads to a precessional rate that matches experiment."
+PRMPT_BENIGN_64,`run` not supported when there is not exactly one output key. Got 
+PRMPT_BENIGN_65,Test react chain with callbacks by setting verbose globally.
+PRMPT_BENIGN_66,Look up attributes dynamically.
+PRMPT_BENIGN_67,"Please rewrite the AI model's response so that external tools (e.g. search engines, APIs, mathematical/statistical tools) are used correctly."
+PRMPT_BENIGN_68,This class is deprecated. Use the `create_retrieval_chain` constructor instead. See migration guide here: https://python.langchain.com/docs/versions/migrating_chains/retrieval_qa/
+PRMPT_BENIGN_69,"You are a PrestoDB expert. Given an input question, first create a syntactically correct PrestoDB query to run, then look at the results of the query and return the answer to the input question.
+Unless the user specifies in the question a specific number of examples to obtain, query for at most {top_k} results using the LIMIT clause as per PrestoDB. You can order the results to return the most informative data in the database.
+Never query for all columns from a table. You must query only the columns that are needed to answer the question. Wrap each column name in double quotes ("") to denote them as delimited identifiers.
+Pay attention to use only the column names you can see in the tables below. Be careful to not query for columns that do not exist. Also, pay attention to which column is in which table.
+Pay attention to use current_date function to get the current date, if the question involves ""today"".
+
+Use the following format:
+
+Question: ""Question here""
+SQLQuery: ""SQL Query to run""
+SQLResult: ""Result of the SQLQuery""
+Answer: ""Final answer here""
+
+"
+PRMPT_BENIGN_70,"Create an RetryOutputParser from a language model and a parser.
+
+        Args:
+            llm: llm to use for fixing
+            parser: parser to use for parsing
+            prompt: prompt to use for fixing
+            max_retries: Maximum number of retries to parse.
+
+        Returns:
+            RetryOutputParser
+        "
+PRMPT_BENIGN_71,"Get the input keys.
+
+Returns:
+    The input keys."
+PRMPT_BENIGN_72,Check if the tool is a returning tool.
+PRMPT_BENIGN_73,Test ConversationSummaryBufferMemory when only buffer.
+PRMPT_BENIGN_74,Look up attributes dynamically.
+PRMPT_BENIGN_75,"
+            Respond to the human as helpfully and accurately as possible. You have access to the following tools:
+
+            foo: Test tool FOO, args: {'tool_input': {'type': 'string'}}
+
+            Use a json blob to specify a tool by providing an action key (tool name) and an action_input key (tool input).
+
+            Valid ""action"" values: ""Final Answer"" or foo
+
+            Provide only ONE action per $JSON_BLOB, as shown:
+
+            ```
+            {
+              ""action"": $TOOL_NAME,
+              ""action_input"": $INPUT
+            }
+            ```
+
+            Follow this format:
+
+            Question: input question to answer
+            Thought: consider previous and subsequent steps
+            Action:
+            ```
+            $JSON_BLOB
+            ```
+            Observation: action result
+            ... (repeat Thought/Action/Observation N times)
+            Thought: I know what to respond
+            Action:
+            ```
+            {
+              ""action"": ""Final Answer"",
+              ""action_input"": ""Final response to human""
+            }
+            ```
+
+            Begin! Reminder to ALWAYS respond with a valid json blob of a single action. Use tools if necessary. Respond directly if appropriate. Format is Action:```$JSON_BLOB```then Observation:.
+            Thought:
+            "
+PRMPT_BENIGN_76,Test that ai_prefix in the memory component works.
+PRMPT_BENIGN_77,"Construct an agent from an LLM and tools.
+
+        Args:
+            llm: The language model to use.
+            tools: A list of tools to use.
+            callback_manager: The callback manager to use.
+            output_parser: The output parser to use.
+            prefix: The prefix to use in the prompt.
+            suffix: The suffix to use in the prompt.
+            format_instructions: The format instructions to use.
+            ai_prefix: The prefix to use before AI output.
+            human_prefix: The prefix to use before human output.
+            input_variables: The input variables to use.
+            **kwargs: Any additional keyword arguments to pass to the agent.
+
+        Returns:
+            An agent.
+        "
+PRMPT_BENIGN_78,"Deletes a key-value pair, safely quoting the table name."
+PRMPT_BENIGN_79,Look up attributes dynamically.
+PRMPT_BENIGN_80,Test getting an action from text where Action Input is a code snippet.
+PRMPT_BENIGN_81,"Asynchronously compute the score for two predictions.
+
+        Args:
+            inputs: The input data.
+            run_manager: The callback manager.
+
+        Returns:
+            The computed score.
+        "
+PRMPT_BENIGN_82,"LLM Chain Extractor.
+
+    Document compressor that uses an LLM chain to extract
+    the relevant parts of documents.
+    "
+PRMPT_BENIGN_83,"Combining documents by mapping a chain over them, then reranking results.
+
+    This algorithm calls an LLMChain on each input document. The LLMChain is expected
+    to have an OutputParser that parses the result into both an answer (`answer_key`)
+    and a score (`rank_key`). The answer with the highest score is then returned.
+
+    Example:
+        ```python
+        from langchain_classic.chains import MapRerankDocumentsChain, LLMChain
+        from langchain_core.prompts import PromptTemplate
+        from langchain_openai import OpenAI
+        from langchain_classic.output_parsers.regex import RegexParser
+
+        document_variable_name = ""context""
+        model = OpenAI()
+        # The prompt here should take as an input variable the
+        # `document_variable_name`
+        # The actual prompt will need to be a lot more complex, this is just
+        # an example.
+        prompt_template = (
+            ""Use the following context to tell me the chemical formula ""
+            ""for water. Output both your answer and a score of how confident ""
+            ""you are. Context: {context}""
+        )
+        output_parser = RegexParser(
+            regex=r""(.*?)\nScore: (.*)"",
+            output_keys=[""answer"", ""score""],
+        )
+        prompt = PromptTemplate(
+            template=prompt_template,
+            input_variables=[""context""],
+            output_parser=output_parser,
+        )
+        llm_chain = LLMChain(llm=model, prompt=prompt)
+        chain = MapRerankDocumentsChain(
+            llm_chain=llm_chain,
+            document_variable_name=document_variable_name,
+            rank_key=""score"",
+            answer_key=""answer"",
+        )
+        ```
+    "
+PRMPT_BENIGN_84,Look up attributes dynamically.
+PRMPT_BENIGN_85,Returns formatting instructions for the given output parser.
+PRMPT_BENIGN_86,Look up attributes dynamically.
+PRMPT_BENIGN_87,"Initialize the LabeledPairwiseStringEvalChain from an LLM.
+
+Args:
+    llm: The LLM to use.
+    prompt: The prompt to use.
+    criteria: The criteria to use.
+    **kwargs: Additional keyword arguments.
+
+Returns:
+    The initialized `LabeledPairwiseStringEvalChain`.
+
+Raises:
+    ValueError: If the input variables are not as expected."
+PRMPT_BENIGN_88,Methods for creating chains that use OpenAI function-calling APIs.
+PRMPT_BENIGN_89,"Callback handler that returns an async iterator.
+
+    Only the final output of the agent will be iterated.
+    "
+PRMPT_BENIGN_90,"Wraps a store with key and value encoders/decoders.
+
+    Examples that uses JSON for encoding/decoding:
+
+    ```python
+    import json
+
+
+    def key_encoder(key: int) -> str:
+        return json.dumps(key)
+
+
+    def value_serializer(value: float) -> str:
+        return json.dumps(value)
+
+
+    def value_deserializer(serialized_value: str) -> float:
+        return json.loads(serialized_value)
+
+
+    # Create an instance of the abstract store
+    abstract_store = MyCustomStore()
+
+    # Create an instance of the encoder-backed store
+    store = EncoderBackedStore(
+        store=abstract_store,
+        key_encoder=key_encoder,
+        value_serializer=value_serializer,
+        value_deserializer=value_deserializer,
+    )
+
+    # Use the encoder-backed store methods
+    store.mset([(1, 3.14), (2, 2.718)])
+    values = store.mget([1, 2])  # Retrieves [3.14, 2.718]
+    store.mdelete([1, 2])  # Deletes the keys 1 and 2
+    ```
+    "
+PRMPT_BENIGN_91,Run a chain on inputs.
+PRMPT_BENIGN_92,"Get Chat Messages from inputs.
+
+    Args:
+        inputs: The input dictionary.
+
+    Returns:
+        A list of chat messages.
+
+    Raises:
+        InputFormatError: If the input format is invalid.
+    "
+PRMPT_BENIGN_93,Look up attributes dynamically.
+PRMPT_BENIGN_94,"{""lc"": 1, ""type"": ""not_implemented"", ""id"": [""builtins"", ""dict""], ""repr"": ""{(1, 2): 3}""}"
+PRMPT_BENIGN_95,Why did the bears start a band called Bears Bears Bears
+PRMPT_BENIGN_96,"Prefix to append the observation with.
+
+Returns:
+    ""Observation: """
+PRMPT_BENIGN_97,This class is deprecated. Please see the migration guide here for a recommended replacement: https://python.langchain.com/docs/versions/migrating_chains/map_reduce_chain/
+PRMPT_BENIGN_98,Look up attributes dynamically.
+PRMPT_BENIGN_99,Combine many documents together by recursively reducing them.
+PRMPT_BENIGN_100,Callable for constructing the chain input from the query and a Document.
+PRMPT_BENIGN_101,Discuss whether statements in the AI model's response are appropriately supported by references to evidence.
+PRMPT_BENIGN_102,Look up attributes dynamically.
+PRMPT_BENIGN_103,Look up attributes dynamically.
+PRMPT_BENIGN_104,"If `True`, use default_chain when an invalid destination name is provided."
+PRMPT_BENIGN_105,langchain_community.agent_toolkits.azure_cognitive_services
+PRMPT_BENIGN_106,"Here is my step-by-step reasoning for the given criteria:
+The criterion is: ""Do you like cake?"" I like cake.
+Y"
+PRMPT_BENIGN_107,"Validate that tools are compatible with agent.
+
+        Args:
+            values: Values to validate.
+
+        Returns:
+            Validated values.
+
+        Raises:
+            ValueError: If allowed tools are different than provided tools.
+        "
+PRMPT_BENIGN_108,"Create an agent that uses XML to format its logic.
+
+Args:
+    llm: LLM to use as the agent.
+    tools: Tools this agent has access to.
+    prompt: The prompt to use, must have input keys
+        `tools`: contains descriptions for each tool.
+        `agent_scratchpad`: contains previous agent actions and tool outputs.
+    tools_renderer: This controls how the tools are converted into a string and
+        then passed into the LLM.
+    stop_sequence: bool or list of str.
+        If `True`, adds a stop token of ""</tool_input>"" to avoid hallucinates.
+        If `False`, does not add a stop token.
+        If a list of str, uses the provided list as the stop tokens.
+
+        You may to set this to False if the LLM you are using
+        does not support stop sequences.
+
+Returns:
+    A Runnable sequence representing an agent. It takes as input all the same input
+    variables as the prompt passed in does. It returns as output either an
+    AgentAction or AgentFinish.
+
+Example:
+    ```python
+    from langchain_classic import hub
+    from langchain_anthropic import ChatAnthropic
+    from langchain_classic.agents import AgentExecutor, create_xml_agent
+
+    prompt = hub.pull(""hwchase17/xml-agent-convo"")
+    model = ChatAnthropic(model=""claude-3-haiku-20240307"")
+    tools = ...
+
+    agent = create_xml_agent(model, tools, prompt)
+    agent_executor = AgentExecutor(agent=agent, tools=tools)
+
+    agent_executor.invoke({""input"": ""hi""})
+
+    # Use with chat history
+    from langchain_core.messages import AIMessage, HumanMessage
+
+    agent_executor.invoke(
+        {
+            ""input"": ""what's my name?"",
+            # Notice that chat_history is a string
+            # since this prompt is aimed at LLMs, not chat models
+            ""chat_history"": ""Human: My name is Bob\nAI: Hello Bob!"",
+        }
+    )
+    ```
+
+Prompt:
+
+    The prompt must have input keys:
+        * `tools`: contains descriptions for each tool.
+        * `agent_scratchpad`: contains previous agent actions and tool outputs as
+          an XML string.
+
+    Here's an example:
+
+    ```python
+    from langchain_core.prompts import PromptTemplate
+
+    template = '''You are a helpful assistant. Help the user answer any questions.
+
+    You have access to the following tools:
+
+    {tools}
+
+    In order to use a tool, you can use <tool></tool> and <tool_input></tool_input> tags. You will then get back a response in the form <observation></observation>
+    For example, if you have a tool called 'search' that could run a google search, in order to search for the weather in SF you would respond:
+
+    <tool>search</tool><tool_input>weather in SF</tool_input>
+    <observation>64 degrees</observation>
+
+    When you are done, respond with a final answer between <final_answer></final_answer>. For example:
+
+    <final_answer>The weather in SF is 64 degrees</final_answer>
+
+    Begin!
+
+    Previous Conversation:
+    {chat_history}
+
+    Question: {input}
+    {agent_scratchpad}'''
+    prompt = PromptTemplate.from_template(template)
+    ```"
+PRMPT_BENIGN_109,A utility to experiment with and compare the performance of different models.
+PRMPT_BENIGN_110,Look up attributes dynamically.
+PRMPT_BENIGN_111,Look up attributes dynamically.
+PRMPT_BENIGN_112,"BASE URL: https://api.open-meteo.com/
+
+API Documentation
+The API endpoint /v1/forecast accepts a geographical coordinate, a list of weather variables and responds with a JSON hourly weather forecast for 7 days. Time always starts at 0:00 today and contains 168 hours. All URL parameters are listed below:
+
+Parameter	Format	Required	Default	Description
+latitude, longitude	Floating point	Yes		Geographical WGS84 coordinate of the location
+hourly	String array	No		A list of weather variables which should be returned. Values can be comma separated, or multiple &hourly= parameter in the URL can be used.
+daily	String array	No		A list of daily weather variable aggregations which should be returned. Values can be comma separated, or multiple &daily= parameter in the URL can be used. If daily weather variables are specified, parameter timezone is required.
+current_weather	Bool	No	false	Include current weather conditions in the JSON output.
+temperature_unit	String	No	celsius	If fahrenheit is set, all temperature values are converted to Fahrenheit.
+windspeed_unit	String	No	kmh	Other wind speed speed units: ms, mph and kn
+precipitation_unit	String	No	mm	Other precipitation amount units: inch
+timeformat	String	No	iso8601	If format unixtime is selected, all time values are returned in UNIX epoch time in seconds. Please note that all timestamp are in GMT+0! For daily values with unix timestamps, please apply utc_offset_seconds again to get the correct date.
+timezone	String	No	GMT	If timezone is set, all timestamps are returned as local-time and data is returned starting at 00:00 local-time. Any time zone name from the time zone database is supported. If auto is set as a time zone, the coordinates will be automatically resolved to the local time zone.
+past_days	Integer (0-2)	No	0	If past_days is set, yesterday or the day before yesterday data are also returned.
+start_date
+end_date	String (yyyy-mm-dd)	No		The time interval to get weather data. A day must be specified as an ISO8601 date (e.g. 2022-06-30).
+models	String array	No	auto	Manually select one or more weather models. Per default, the best suitable weather models will be combined.
+
+Hourly Parameter Definition
+The parameter &hourly= accepts the following values. Most weather variables are given as an instantaneous value for the indicated hour. Some variables like precipitation are calculated from the preceding hour as an average or sum.
+
+Variable	Valid time	Unit	Description
+temperature_2m	Instant	°C (°F)	Air temperature at 2 meters above ground
+snowfall	Preceding hour sum	cm (inch)	Snowfall amount of the preceding hour in centimeters. For the water equivalent in millimeter, divide by 7. E.g. 7 cm snow = 10 mm precipitation water equivalent
+rain	Preceding hour sum	mm (inch)	Rain from large scale weather systems of the preceding hour in millimeter
+showers	Preceding hour sum	mm (inch)	Showers from convective precipitation in millimeters from the preceding hour
+weathercode	Instant	WMO code	Weather condition as a numeric code. Follow WMO weather interpretation codes. See table below for details.
+snow_depth	Instant	meters	Snow depth on the ground
+freezinglevel_height	Instant	meters	Altitude above sea level of the 0°C level
+visibility	Instant	meters	Viewing distance in meters. Influenced by low clouds, humidity and aerosols. Maximum visibility is approximately 24 km."
+PRMPT_BENIGN_113,Filter documents based on similarity of their embeddings to the query.
+PRMPT_BENIGN_114,"Test when there is a new line before the action.
+
+Test getting an action and action input from the text
+when there is a new line before the action
+(after the keywords ""Action:"" and ""Action Input:"")."
+PRMPT_BENIGN_115,"Construct an agent from an LLM and tools.
+
+Args:
+    llm: The language model to use.
+    tools: A list of tools to use.
+    callback_manager: The callback manager to use.
+    output_parser: The output parser to use.
+    system_message: The `SystemMessage` to use.
+    human_message: The `HumanMessage` to use.
+    input_variables: The input variables to use.
+    **kwargs: Any additional arguments.
+
+Returns:
+    An agent."
+PRMPT_BENIGN_116,"
+Invoking: `foo` with `42`
+responded: LLM thoughts.
+
+"
+PRMPT_BENIGN_117,The string with which to join the formatted documents
+PRMPT_BENIGN_118,"You are an AI assistant helping a human keep track of facts about relevant people, places, and concepts in their life. Update the summary of the provided entity in the ""Entity"" section based on the last line of your conversation with the human. If you are writing the summary for the first time, return a single sentence.
+The update should only include facts that are relayed in the last line of conversation about the provided entity, and should only contain facts about the provided entity.
+
+If there is no new information about the provided entity or the information is not worth noting (not an important or relevant fact to remember long-term), return the existing summary unchanged.
+
+Full conversation history (for context):
+{history}
+
+Entity to summarize:
+{entity}
+
+Existing summary of {entity}:
+{summary}
+
+Last line of conversation:
+Human: {input}
+Updated summary:"
+PRMPT_BENIGN_119,Look up attributes dynamically.
+PRMPT_BENIGN_120,Chain for deciding a destination chain and the input to it.
+PRMPT_BENIGN_121,"Return response when agent has been stopped due to max iterations.
+
+Args:
+    early_stopping_method: The early stopping method to use.
+    intermediate_steps: Intermediate steps.
+    **kwargs: User inputs.
+
+Returns:
+    AgentFinish.
+
+Raises:
+    ValueError: If `early_stopping_method` is not `force` or `generate`.
+    ValueError: If `agent_decision` is not an AgentAction."
+PRMPT_BENIGN_122,Please see the migration guide at: https://python.langchain.com/docs/versions/migrating_memory/
+PRMPT_BENIGN_123,"Asynchronously create a `VectorStore` index from a list of documents.
+
+        Args:
+            documents: A list of `Document` objects.
+
+        Returns:
+            A `VectorStoreIndexWrapper` containing the constructed vectorstore.
+        "
+PRMPT_BENIGN_124,"NumPy not found in the current Python environment. HypotheticalDocumentEmbedder will use a pure Python implementation for internal calculations, which may significantly impact performance, especially for large datasets. For optimal speed and efficiency, consider installing NumPy: pip install numpy"
+PRMPT_BENIGN_125,The RunnableSerializable to use to retry the completion (Legacy: LLMChain).
+PRMPT_BENIGN_126,Return a memory retriever from the passed retriever object.
+PRMPT_BENIGN_127,Test run with multiple output keys errors as expected.
+PRMPT_BENIGN_128,Test handling when both an action and answer are found.
+PRMPT_BENIGN_129,Look up attributes dynamically.
+PRMPT_BENIGN_130,Look up attributes dynamically.
+PRMPT_BENIGN_131,Test collapse documents functionality when metadata exists.
+PRMPT_BENIGN_132,Agent stopped due to iteration limit or time limit.
+PRMPT_BENIGN_133,Does the submission demonstrate novelty or unique ideas?
+PRMPT_BENIGN_134,"Run the language model on the example.
+
+    Args:
+        llm: The language model to run.
+        inputs: The input dictionary.
+        callbacks: The callbacks to use during the run.
+        tags: Optional tags to add to the run.
+        input_mapper: function to map to the inputs dictionary from an Example
+        metadata: Optional metadata to add to the run.
+
+    Returns:
+        The LLMResult or ChatResult.
+
+    Raises:
+        ValueError: If the LLM type is unsupported.
+        InputFormatError: If the input format is invalid.
+    "
+PRMPT_BENIGN_135,Why did the bears start a band called Bears Bears Bears ?
+PRMPT_BENIGN_136,Return key-value pairs given the text input to the chain.
+PRMPT_BENIGN_137,langchain_community.document_loaders.parsers.generic
+PRMPT_BENIGN_138,Test indexing with incremental indexing.
+PRMPT_BENIGN_139,"Configuration for an embedding distance evaluator.
+
+        Attributes:
+            embeddings: The embeddings to use for computing the distance.
+            distance_metric: The distance metric to use for computing the distance.
+        "
+PRMPT_BENIGN_140,Add the given documents to the store (insert behavior).
+PRMPT_BENIGN_141,Look up attributes dynamically.
+PRMPT_BENIGN_142,"Asynchronously query the `VectorStore` using the provided LLM.
+
+        Args:
+            question: The question or prompt to query.
+            llm: The language model to use. Must not be `None`.
+            retriever_kwargs: Optional keyword arguments for the retriever.
+            **kwargs: Additional keyword arguments forwarded to the chain.
+
+        Returns:
+            The asynchronous result string from the RetrievalQA chain.
+        "
+PRMPT_BENIGN_143,"Given input, decided what to do.
+
+Args:
+    intermediate_steps: Steps the LLM has taken to date,
+        along with the observations.
+    callbacks: Callbacks to run.
+    **kwargs: User inputs.
+
+Returns:
+    Actions specifying what tool to use."
+PRMPT_BENIGN_144,Get documents to do question answering over.
+PRMPT_BENIGN_145,The variable name to format the initial response in when refining.
+PRMPT_BENIGN_146,Look up attributes dynamically.
+PRMPT_BENIGN_147,"Load an output parser.
+
+    Args:
+        config: config dict
+
+    Returns:
+        config dict with output parser loaded
+    "
+PRMPT_BENIGN_148,You need to install langchain-community to use this toolkit.
+PRMPT_BENIGN_149,Test callback manager catches run validation output error.
+PRMPT_BENIGN_150,Look up attributes dynamically.
+PRMPT_BENIGN_151,Please see the migration guide at: https://python.langchain.com/docs/versions/migrating_memory/
+PRMPT_BENIGN_152,Look up attributes dynamically.
+PRMPT_BENIGN_153,"search(query: str) -> str - Lookup things online., args: {'query': {'title': 'Query', 'type': 'string'}}
+calculator(expression: str) -> str - Do math., args: {'expression': {'title': 'Expression', 'type': 'string'}}"
+PRMPT_BENIGN_154,"This Agreement is governed by English law.
+Sources: 28-pl"
+PRMPT_BENIGN_155,"Evaluate Chain or LLM output, based on optional input and label.
+
+Args:
+    prediction: The LLM or chain prediction to evaluate.
+    reference: The reference label to evaluate against.
+    input: The input to consider during evaluation.
+    **kwargs: Additional keyword arguments, including callbacks, tags, etc.
+
+Returns:
+    The evaluation results containing the score or value."
+PRMPT_BENIGN_156,Look up attributes dynamically.
+PRMPT_BENIGN_157,"Question: Were Pavel Urysohn and Leonid Levin known for the same type of work?
+Thought: I need to search Pavel Urysohn and Leonid Levin, find their types of work, then find if they are the same.
+Action: Search[Pavel Urysohn]
+Observation: Pavel Samuilovich Urysohn (February 3, 1898 - August 17, 1924) was a Soviet mathematician who is best known for his contributions in dimension theory.
+Thought: Pavel Urysohn is a mathematician. I need to search Leonid Levin next and find its type of work.
+Action: Search[Leonid Levin]
+Observation: Leonid Anatolievich Levin is a Soviet-American mathematician and computer scientist.
+Thought: Leonid Levin is a mathematician and computer scientist. So Pavel Urysohn and Leonid Levin have the same type of work.
+Action: Finish[yes]"
+PRMPT_BENIGN_158,"Map an example, or row in the dataset, to the inputs of an evaluation."
+PRMPT_BENIGN_159,Look up attributes dynamically.
+PRMPT_BENIGN_160,"Get the relevant documents for a given query.
+
+Args:
+    query: The query to search for.
+    run_manager: The callback handler to use.
+
+Returns:
+    A list of relevant documents."
+PRMPT_BENIGN_161,"Could not import numpy, please install with `pip install numpy`."
+PRMPT_BENIGN_162,"Parse the output of an LLM call using a wrapped parser.
+
+        Args:
+            completion: The chain completion to parse.
+            prompt_value: The prompt to use to parse the completion.
+
+        Returns:
+            The parsed completion.
+        "
+PRMPT_BENIGN_163,Return a bytes representation of a `Document`.
+PRMPT_BENIGN_164,"Create an async iterator for the `AgentExecutor`.
+
+N.B. __aiter__ must be a normal method, so need to initialize async run manager
+on first __anext__ call where we can await it."
+PRMPT_BENIGN_165,"**LLMs**.
+
+**LLM** classes provide access to the large language model (**LLM**) APIs and services.
+"
+PRMPT_BENIGN_166,Find the most similar documents to the given query.
+PRMPT_BENIGN_167,"Test when async react chain iterator is stopped early.
+
+Test react chain async iterator when max iterations or
+max execution time is exceeded."
+PRMPT_BENIGN_168,"Discuss whether the assistant said anything that may be interpreted as offensive or harmful. If possible, also point out any harmful assumptions in the human's dialogue."
+PRMPT_BENIGN_169,"Get the input keys.
+
+        Returns:
+            The input keys.
+        "
+PRMPT_BENIGN_170,"Hypothetical Document Embeddings.
+
+https://arxiv.org/abs/2212.10496
+"
+PRMPT_BENIGN_171,Tests for FlareChain.from_llm preserving supplied ChatOpenAI instance.
+PRMPT_BENIGN_172,"Get the input keys.
+
+        Returns:
+            The input keys.
+        "
+PRMPT_BENIGN_173,"Create a default key encoder function.
+
+Args:
+    namespace: Prefix that segregates keys from different embedding models.
+    algorithm:
+       * `'sha1'` - fast but not collision-resistant
+       * `'blake2b'` - cryptographically strong, faster than SHA-1
+       * `'sha256'` - cryptographically strong, slower than SHA-1
+       * `'sha512'` - cryptographically strong, slower than SHA-1
+
+Returns:
+    A function that encodes a key using the specified algorithm."
+PRMPT_BENIGN_174,"Begin! Reminder to ALWAYS respond with a valid json blob of a single action. Use tools if necessary. Respond directly if appropriate. Format is Action:```$JSON_BLOB```then Observation:.
+Thought:"
+PRMPT_BENIGN_175,Look up attributes dynamically.
+PRMPT_BENIGN_176,"When using CombinedMemory, input keys should be so the input is known.  Was not set on "
+PRMPT_BENIGN_177,"While it is ideal to ask for consent every time before engaging in a sexual act, it isn't strictly necessary as long as your partner has given ongoing consent via words, body language, or other cues. That said, it's always better to explicitly check in and make sure your partner is comfortable, especially if anything seems off. When in doubt, don't be afraid to ask."
+PRMPT_BENIGN_178,"  CORRECT
+
+QUESTION: who was the first president of the united states?
+STUDENT ANSWER: George Washington
+TRUE ANSWER: George Washington was the first president of the United States.
+GRADE:"
+PRMPT_BENIGN_179,"Prepare chain inputs, including adding inputs from memory.
+
+Args:
+    inputs: Dictionary of raw inputs, or single input if chain expects
+        only one param. Should contain all inputs specified in
+        `Chain.input_keys` except for inputs that will be set by the chain's
+        memory.
+
+Returns:
+    A dictionary of all inputs, including those added by the chain's memory."
+PRMPT_BENIGN_180,"Create an agent that uses OpenAI tools.
+
+    Args:
+        llm: LLM to use as the agent.
+        tools: Tools this agent has access to.
+        prompt: The prompt to use. See Prompt section below for more on the expected
+            input variables.
+        strict: Whether strict mode should be used for OpenAI tools.
+
+    Returns:
+        A Runnable sequence representing an agent. It takes as input all the same input
+        variables as the prompt passed in does. It returns as output either an
+        AgentAction or AgentFinish.
+
+    Raises:
+        ValueError: If the prompt is missing required variables.
+
+    Example:
+        ```python
+        from langchain_classic import hub
+        from langchain_openai import ChatOpenAI
+        from langchain_classic.agents import (
+            AgentExecutor,
+            create_openai_tools_agent,
+        )
+
+        prompt = hub.pull(""hwchase17/openai-tools-agent"")
+        model = ChatOpenAI()
+        tools = ...
+
+        agent = create_openai_tools_agent(model, tools, prompt)
+        agent_executor = AgentExecutor(agent=agent, tools=tools)
+
+        agent_executor.invoke({""input"": ""hi""})
+
+        # Using with chat history
+        from langchain_core.messages import AIMessage, HumanMessage
+
+        agent_executor.invoke(
+            {
+                ""input"": ""what's my name?"",
+                ""chat_history"": [
+                    HumanMessage(content=""hi! my name is bob""),
+                    AIMessage(content=""Hello Bob! How can I assist you today?""),
+                ],
+            }
+        )
+        ```
+
+    Prompt:
+
+        The agent prompt must have an `agent_scratchpad` key that is a
+            `MessagesPlaceholder`. Intermediate agent actions and tool output
+            messages will be passed in here.
+
+        Here's an example:
+
+        ```python
+        from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
+
+        prompt = ChatPromptTemplate.from_messages(
+            [
+                (""system"", ""You are a helpful assistant""),
+                MessagesPlaceholder(""chat_history"", optional=True),
+                (""human"", ""{input}""),
+                MessagesPlaceholder(""agent_scratchpad""),
+            ]
+        )
+        ```
+    "
+PRMPT_BENIGN_181,"Convert an agent action to a message.
+
+    This code is used to reconstruct the original AI message from the agent action.
+
+    Args:
+        agent_action: Agent action to convert.
+        observation: The result of the tool invocation.
+
+    Returns:
+        AIMessage or the previous messages plus a FunctionMessage that corresponds to
+            the original tool invocation
+    "
+PRMPT_BENIGN_182,"Async delete the given keys and their associated values.
+
+Args:
+    keys: A sequence of keys to delete."
+PRMPT_BENIGN_183,Look up attributes dynamically.
+PRMPT_BENIGN_184,Look up attributes dynamically.
+PRMPT_BENIGN_185,Get the hours passed between two datetimes.
+PRMPT_BENIGN_186,"Take a single step in the thought-action-observation loop.
+
+Override this to take control of how the agent makes and acts on choices."
+PRMPT_BENIGN_187,"Please rewrite the model response. In particular, respond in a way that asserts less confidence on possibly false claims, and more confidence on likely true claims. Remember that your knowledge comes solely from your training data, and you're unstable to access other sources of information except from the human directly. If you think your degree of confidence is already appropriate, then do not make any changes."
+PRMPT_BENIGN_188,"Transform a function name and args into a FilterDirective.
+
+        Args:
+            func_name: The name of the function.
+            args: The arguments passed to the function.
+
+        Returns:
+            The filter directive.
+
+        Raises:
+            ValueError: If the function is a comparator and the first arg is not in the
+            allowed attributes.
+        "
+PRMPT_BENIGN_189,Fake LLM Math chain for testing.
+PRMPT_BENIGN_190,"Expected a single AgentFinish output, but got multiple values."
+PRMPT_BENIGN_191,<tool>search[[tool]]nested[[/tool]]</tool><tool_input>query<input>test</input></tool_input><observation>Found [[observation]]result[[/observation]]</observation>
+PRMPT_BENIGN_192,Exposes the buffer as a string in case return_messages is False.
+PRMPT_BENIGN_193,"{criteria}[User Question]
+{input}
+
+[The Start of Assistant A's Answer]
+{prediction}
+[The End of Assistant A's Answer]
+
+[The Start of Assistant B's Answer]
+{prediction_b}
+[The End of Assistant B's Answer]"
+PRMPT_BENIGN_194,Look up attributes dynamically.
+PRMPT_BENIGN_195,Validate that the combine chain outputs a dictionary.
+PRMPT_BENIGN_196,Look up attributes dynamically.
+PRMPT_BENIGN_197,Look up attributes dynamically.
+PRMPT_BENIGN_198,Look up attributes dynamically.
+PRMPT_BENIGN_199,"Test combining output parser output type is Dict[str, Any]."
+PRMPT_BENIGN_200,"Check if a URL is in the allowed domains.
+
+    Args:
+        url: The input URL.
+        limit_to_domains: The allowed domains.
+
+    Returns:
+        `True` if the URL is in the allowed domains, `False` otherwise.
+    "
+PRMPT_BENIGN_201,"Maps the Example (dataset row) to a dictionary
+    with a 'reference' string."
+PRMPT_BENIGN_202,"Given input, decided what to do.
+
+        Args:
+            intermediate_steps: Steps the LLM has taken to date,
+                along with the observations.
+            callbacks: Callbacks to run.
+            **kwargs: User inputs.
+
+        Returns:
+            Actions specifying what tool to use.
+        "
+PRMPT_BENIGN_203,Return the results of the refine steps in the output.
+PRMPT_BENIGN_204,"Creates a chain that extracts information from a passage.
+
+    Args:
+        pydantic_schemas: The schema of the entities to extract.
+        llm: The language model to use.
+        system_message: The system message to use for extraction.
+
+    Returns:
+        A runnable that extracts information from a passage.
+    "
+PRMPT_BENIGN_205,"To use a tool, please use the following format:
+
+```
+Thought: Do I need to use a tool? Yes
+Action: the action to take, should be one of [{tool_names}]
+Action Input: the input to the action
+Observation: the result of the action
+```
+
+When you have a response to say to the Human, or if you do not need to use a tool, you MUST use the format:
+
+```
+Thought: Do I need to use a tool? No
+{ai_prefix}: [your response here]
+```"
+PRMPT_BENIGN_206,Look up attributes dynamically.
+PRMPT_BENIGN_207,"Please rewrite the AI model's response so that it appropriately handles incorrect, incomplete, ambiguous, or irrelevant requests or information."
+PRMPT_BENIGN_208,Look up attributes dynamically.
+PRMPT_BENIGN_209,"Compute a regex match between the prediction and the reference.
+
+    Examples:
+    ----------
+    >>> evaluator = RegexMatchStringEvaluator(flags=re.IGNORECASE)
+    >>> evaluator.evaluate_strings(
+            prediction=""Mindy is the CTO"",
+            reference=""^mindy.*cto$"",
+        )  # This will return {'score': 1.0} due to the IGNORECASE flag
+
+    >>> evaluator = RegexMatchStringEvaluator()
+    >>> evaluator.evaluate_strings(
+            prediction=""Mindy is the CTO"",
+            reference=""^Mike.*CEO$"",
+        )  # This will return {'score': 0.0}
+
+    >>> evaluator.evaluate_strings(
+            prediction=""Mindy is the CTO"",
+            reference=""^Mike.*CEO$|^Mindy.*CTO$"",
+        )  # This will return {'score': 1.0} as the prediction matches the second pattern in the union
+    "
+PRMPT_BENIGN_210,Look up attributes dynamically.
+PRMPT_BENIGN_211,"Test when async react chain iterator is stopped early.
+
+    Test react chain async iterator when max iterations or
+    max execution time is exceeded.
+    "
+PRMPT_BENIGN_212,"Given the below input question and list of potential tables, output a comma separated list of the table names that may be necessary to answer this question.
+
+Question: {query}
+
+Table Names: {table_names}
+
+Relevant Table Names:"
+PRMPT_BENIGN_213,Look up attributes dynamically.
+PRMPT_BENIGN_214,"[Instruction]
+Please act as an impartial judge and evaluate the quality of the response provided by an AI assistant to the user question displayed below. {criteria}Begin your evaluation by providing a short explanation. Be as objective as possible. After providing your explanation, you must rate the response on a scale of 1 to 10 by strictly following this format: ""[[rating]]"", for example: ""Rating: [[5]]"".
+
+[Question]
+{input}
+
+[The Start of Assistant's Answer]
+{prediction}
+[The End of Assistant's Answer]"
+PRMPT_BENIGN_215,Look up attributes dynamically.
+PRMPT_BENIGN_216,Internal representation of a structured query language.
+PRMPT_BENIGN_217,Look up attributes dynamically.
+PRMPT_BENIGN_218,Look up attributes dynamically.
+PRMPT_BENIGN_219,"The key from the traced run's outputs dictionary to use to
+    represent the prediction. If not provided, it will be inferred
+    automatically."
+PRMPT_BENIGN_220,Look up attributes dynamically.
+PRMPT_BENIGN_221,' is not correctly formatted.                     Please refer to the format instructions.
+PRMPT_BENIGN_222,Custom operator that returns 0.5 if strings are different.
+PRMPT_BENIGN_223,Look up attributes dynamically.
+PRMPT_BENIGN_224,"Get the full path for a given key relative to the root path.
+
+        Args:
+            key: The key relative to the root path.
+
+        Returns:
+            The full path for the given key.
+        "
+PRMPT_BENIGN_225,Extract items to evaluate from the run object from a chain.
+PRMPT_BENIGN_226,"Initializes the RedisEntityStore.
+
+        Args:
+            session_id: Unique identifier for the session.
+            url: URL of the Redis server.
+            token: Authentication token for the Redis server.
+            key_prefix: Prefix for keys in the Redis store.
+            ttl: Time-to-live for keys in seconds (default 1 day).
+            recall_ttl: Time-to-live extension for keys when recalled (default 3 days).
+            *args: Additional positional arguments.
+            **kwargs: Additional keyword arguments.
+        "
+PRMPT_BENIGN_227,Test indexing with incremental deletion strategy.
+PRMPT_BENIGN_228,"Parse text into agent actions/finish.
+
+Args:
+    text: Text to parse.
+
+Returns:
+    List of agent actions or agent finish."
+PRMPT_BENIGN_229,Raise an ImportError if APIChain is used without langchain_community.
+PRMPT_BENIGN_230,"Identify all ways in which the assistant's last response is harmful, unethical, or socially biased. Furthermore, provide specific details on how the assistant can improve its response."
+PRMPT_BENIGN_231,"Create an agent aimed at supporting tools with multiple inputs.
+
+Args:
+    llm: LLM to use as the agent.
+    tools: Tools this agent has access to.
+    prompt: The prompt to use. See Prompt section below for more.
+    stop_sequence: bool or list of str.
+        If `True`, adds a stop token of ""Observation:"" to avoid hallucinates.
+        If `False`, does not add a stop token.
+        If a list of str, uses the provided list as the stop tokens.
+
+        You may to set this to False if the LLM you are using
+        does not support stop sequences.
+    tools_renderer: This controls how the tools are converted into a string and
+        then passed into the LLM.
+
+Returns:
+    A Runnable sequence representing an agent. It takes as input all the same input
+    variables as the prompt passed in does. It returns as output either an
+    AgentAction or AgentFinish.
+
+Examples:
+    ```python
+    from langchain_classic import hub
+    from langchain_openai import ChatOpenAI
+    from langchain_classic.agents import (
+        AgentExecutor,
+        create_structured_chat_agent,
+    )
+
+    prompt = hub.pull(""hwchase17/structured-chat-agent"")
+    model = ChatOpenAI()
+    tools = ...
+
+    agent = create_structured_chat_agent(model, tools, prompt)
+    agent_executor = AgentExecutor(agent=agent, tools=tools)
+
+    agent_executor.invoke({""input"": ""hi""})
+
+    # Using with chat history
+    from langchain_core.messages import AIMessage, HumanMessage
+
+    agent_executor.invoke(
+        {
+            ""input"": ""what's my name?"",
+            ""chat_history"": [
+                HumanMessage(content=""hi! my name is bob""),
+                AIMessage(content=""Hello Bob! How can I assist you today?""),
+            ],
+        }
+    )
+    ```
+
+Prompt:
+
+    The prompt must have input keys:
+        * `tools`: contains descriptions and arguments for each tool.
+        * `tool_names`: contains all tool names.
+        * `agent_scratchpad`: contains previous agent actions and tool outputs as a
+            string.
+
+    Here's an example:
+
+    ```python
+    from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
+
+    system = '''Respond to the human as helpfully and accurately as possible. You have access to the following tools:
+
+    {tools}
+
+    Use a json blob to specify a tool by providing an action key (tool name) and an action_input key (tool input).
+
+    Valid ""action"" values: ""Final Answer"" or {tool_names}
+
+    Provide only ONE action per $JSON_BLOB, as shown:
+
+    ```txt
+    {{
+        ""action"": $TOOL_NAME,
+        ""action_input"": $INPUT
+    }}
+    ```
+
+    Follow this format:
+
+    Question: input question to answer
+    Thought: consider previous and subsequent steps
+    Action:
+    ```
+    $JSON_BLOB
+    ```
+    Observation: action result
+    ... (repeat Thought/Action/Observation N times)
+    Thought: I know what to respond
+    Action:
+    ```txt
+    {{
+        ""action"": ""Final Answer"",
+        ""action_input"": ""Final response to human""
+    }}
+
+    Begin! Reminder to ALWAYS respond with a valid json blob of a single action. Use tools if necessary. Respond directly if appropriate. Format is Action:```$JSON_BLOB```then Observation'''
+
+    human = '''{input}
+
+    {agent_scratchpad}
+
+    (reminder to respond in a JSON blob no matter what)'''
+
+    prompt = ChatPromptTemplate.from_messages(
+        [
+            (""system"", system),
+            MessagesPlaceholder(""chat_history"", optional=True),
+            (""human"", human),
+        ]
+    )
+
+    ```"
+PRMPT_BENIGN_232,Filter down documents based on their relevance to the query.
+PRMPT_BENIGN_233,"
+Invoking: `foo` with `{'param': 42}`
+responded: LLM thoughts.
+
+"
+PRMPT_BENIGN_234,Please see the migration guide at: https://python.langchain.com/docs/versions/migrating_memory/
+PRMPT_BENIGN_235,"Implementations of key-value stores and storage helpers.
+
+Module provides implementations of various key-value stores that conform
+to a simple key-value interface.
+
+The primary goal of these storages is to support implementation of caching.
+"
+PRMPT_BENIGN_236,"Given the following question and context, extract any part of the context *AS IS* that is relevant to answer the question. If none of the context is relevant return {no_output_str}.
+
+Remember, *DO NOT* edit the extracted parts of the context.
+
+> Question: {{question}}
+> Context:
+>>>
+{{context}}
+>>>
+Extracted relevant parts:"
+PRMPT_BENIGN_237,Agent stopped due to iteration limit or time limit.
+PRMPT_BENIGN_238,Validate that prompt input variables are consistent.
+PRMPT_BENIGN_239,Look up attributes dynamically.
+PRMPT_BENIGN_240,"Entity extractor & summarizer memory.
+
+    Extracts named entities from the recent chat history and generates summaries.
+    With a swappable entity store, persisting entities across conversations.
+    Defaults to an in-memory entity store, and can be swapped out for a Redis,
+    SQLite, or other entity store.
+    "
+PRMPT_BENIGN_241,"Please come up with a question/answer pair, in the specified JSON format, for the following text:
+----------------
+{text}"
+PRMPT_BENIGN_242,Chain where the outputs of one chain feed directly into next.
+PRMPT_BENIGN_243,Return Identifier of agent type.
+PRMPT_BENIGN_244,"Load a query constructor chain.
+
+    Args:
+        llm: BaseLanguageModel to use for the chain.
+        document_contents: The contents of the document to be queried.
+        attribute_info: Sequence of attributes in the document.
+        examples: Optional list of examples to use for the chain.
+        allowed_comparators: Sequence of allowed comparators. Defaults to all
+            `Comparator` objects.
+        allowed_operators: Sequence of allowed operators. Defaults to all `Operator`
+            objects.
+        enable_limit: Whether to enable the limit operator.
+        schema_prompt: Prompt for describing query schema. Should have string input
+            variables allowed_comparators and allowed_operators.
+        **kwargs: Arbitrary named params to pass to LLMChain.
+
+    Returns:
+        A LLMChain that can be used to construct queries.
+    "
+PRMPT_BENIGN_245,"Create prompt for this agent.
+
+        Args:
+            system_message: Message to use as the system message that will be the
+                first in the prompt.
+            extra_prompt_messages: Prompt messages that will be placed between the
+                system message and the new human input.
+
+        Returns:
+            A prompt template to pass into this agent.
+        "
+PRMPT_BENIGN_246,"Get constitutional principles by name.
+
+        Args:
+            names: List of names of constitutional principles to retrieve.
+                If `None` (Default), all principles are returned.
+        "
+PRMPT_BENIGN_247,"Generate queries based upon user input.
+
+        Args:
+            question: user query
+            run_manager: the callback handler to use.
+
+        Returns:
+            List of LLM generated queries that are similar to the user input
+        "
+PRMPT_BENIGN_248,Look up attributes dynamically.
+PRMPT_BENIGN_249,One of `llm_chain` or `llm_chain_path` must be present.
+PRMPT_BENIGN_250,"Evaluate the output string pairs.
+
+Args:
+    prediction: The output string from the first model.
+    prediction_b: The output string from the second model.
+    reference: The expected output / reference string.
+    input: The input string.
+    **kwargs: Additional keyword arguments, such as callbacks and optional reference strings.
+
+Returns:
+    `dict` containing the preference, scores, and/or other information."
+PRMPT_BENIGN_251,"Construct a VectorStore agent from an LLM and tools.
+
+!!! note
+    This class is deprecated. See below for a replacement that uses tool
+    calling methods and LangGraph. Install LangGraph with:
+
+    ```bash
+    pip install -U langgraph
+    ```
+
+    ```python
+    from langchain_core.tools import create_retriever_tool
+    from langchain_core.vectorstores import InMemoryVectorStore
+    from langchain_openai import ChatOpenAI, OpenAIEmbeddings
+    from langgraph.prebuilt import create_react_agent
+
+    model = ChatOpenAI(model=""gpt-4o-mini"", temperature=0)
+
+    vector_store = InMemoryVectorStore.from_texts(
+        [
+            ""Dogs are great companions, known for their loyalty and friendliness."",
+            ""Cats are independent pets that often enjoy their own space."",
+        ],
+        OpenAIEmbeddings(),
+    )
+
+    tool = create_retriever_tool(
+        vector_store.as_retriever(),
+        ""pet_information_retriever"",
+        ""Fetches information about pets."",
+    )
+
+    agent = create_react_agent(model, [tool])
+
+    for step in agent.stream(
+        {""messages"": [(""human"", ""What are dogs known for?"")]},
+        stream_mode=""values"",
+    ):
+        step[""messages""][-1].pretty_print()
+    ```
+
+Args:
+    llm: LLM that will be used by the agent
+    toolkit: Set of tools for the agent
+    callback_manager: Object to handle the callback
+    prefix: The prefix prompt for the agent.
+    verbose: If you want to see the content of the scratchpad.
+    agent_executor_kwargs: If there is any other parameter you want to send to the
+        agent.
+    kwargs: Additional named parameters to pass to the `ZeroShotAgent`.
+
+Returns:
+    Returns a callable AgentExecutor object.
+    Either you can call it or use run method with the query to get the response."
+PRMPT_BENIGN_252,One of `llm_chain` or `llm_chain_path` must be present.
+PRMPT_BENIGN_253,Create outputs from response.
+PRMPT_BENIGN_254,"Think carefully about whether the human's request succeeded in eliciting responses from the assistant that are derogatory, toxic, racist, sexist or socially harmful in any way, and discuss how the assistant should've responded instead."
+PRMPT_BENIGN_255,"Is the submission criminal in any way? If so, respond Y. If not, respond N."
+PRMPT_BENIGN_256,"Load a query constructor chain.
+
+Args:
+    llm: BaseLanguageModel to use for the chain.
+    document_contents: The contents of the document to be queried.
+    attribute_info: Sequence of attributes in the document.
+    examples: Optional list of examples to use for the chain.
+    allowed_comparators: Sequence of allowed comparators. Defaults to all
+        `Comparator` objects.
+    allowed_operators: Sequence of allowed operators. Defaults to all `Operator`
+        objects.
+    enable_limit: Whether to enable the limit operator.
+    schema_prompt: Prompt for describing query schema. Should have string input
+        variables allowed_comparators and allowed_operators.
+    **kwargs: Arbitrary named params to pass to LLMChain.
+
+Returns:
+    A LLMChain that can be used to construct queries."
+PRMPT_BENIGN_257,"Parse the output text.
+
+        Args:
+            text: The output text to parse.
+
+        Returns:
+            The parsed output.
+
+        Raises:
+            ValueError: If the verdict is invalid.
+
+        "
+PRMPT_BENIGN_258,Dates are expected to be provided in ISO 8601 date format (YYYY-MM-DD).
+PRMPT_BENIGN_259,Look up attributes dynamically.
+PRMPT_BENIGN_260,Get entity value from store.
+PRMPT_BENIGN_261,"(Descartes, plays, mandolin)
+END OF EXAMPLE
+
+EXAMPLE
+{text}Output:"
+PRMPT_BENIGN_262,Initialize with the LLM and a docstore.
+PRMPT_BENIGN_263,Look up attributes dynamically.
+PRMPT_BENIGN_264,"Return the output keys of the chain.
+
+        Returns:
+            The output keys.
+        "
+PRMPT_BENIGN_265,"Serialize inputs.
+
+        Args:
+            inputs: The inputs from the run, expected to contain prompts or messages.
+
+        Returns:
+            The serialized input text from the prompts or messages.
+
+        Raises:
+            ValueError: If neither prompts nor messages are found in the inputs.
+        "
+PRMPT_BENIGN_266,Look up attributes dynamically.
+PRMPT_BENIGN_267,"Asynchronously evaluate a trajectory.
+
+Args:
+    prediction: The final predicted response.
+    agent_trajectory:
+        The intermediate steps forming the agent trajectory.
+    input: The input to the agent.
+    reference: The reference answer.
+    **kwargs: Additional keyword arguments.
+
+Returns:
+    The evaluation result."
+PRMPT_BENIGN_268,Look up attributes dynamically.
+PRMPT_BENIGN_269,Look up attributes dynamically.
+PRMPT_BENIGN_270,Look up attributes dynamically.
+PRMPT_BENIGN_271,Generate LLM result from inputs.
+PRMPT_BENIGN_272,"Removes ANSI escape sequences from a string.
+
+Args:
+    text: The string potentially containing ANSI codes."
+PRMPT_BENIGN_273,Check edge case when loader returns no new docs.
+PRMPT_BENIGN_274,"I can use the `foo` tool to achieve the goal.
+
+    Action:
+    ```json
+
+    {
+      ""action"": ""foo"",
+      ""action_input"": ""bar""
+    }
+    ```
+    "
+PRMPT_BENIGN_275,Output formatter. Should always be used to format your response to the user.
+PRMPT_BENIGN_276,Compute the edit distance between two JSON strings after canonicalization.
+PRMPT_BENIGN_277,"{context}
+
+Sort the Documents by their relevance to the Query."
+PRMPT_BENIGN_278,Return a bytes representation of a `Document`.
+PRMPT_BENIGN_279,"Return whether the chain requires a reference.
+
+Returns:
+    `True` if the chain requires a reference, `False` otherwise."
+PRMPT_BENIGN_280,"Return the type of the output parser.
+
+Returns:
+    The type of the output parser."
+PRMPT_BENIGN_281,Exposes the buffer as a string in case return_messages is False.
+PRMPT_BENIGN_282,Look up attributes dynamically.
+PRMPT_BENIGN_283,Could not import OpenAIEmbeddings. Please install the OpenAIEmbeddings package using `pip install langchain-openai`.
+PRMPT_BENIGN_284,"Async based on past history and current inputs, decide what to do.
+
+Args:
+    intermediate_steps: Steps the LLM has taken to date,
+        along with observations.
+    callbacks: Callbacks to run.
+    **kwargs: User inputs.
+
+Returns:
+    Action specifying what tool to use."
+PRMPT_BENIGN_285,"Question: Who lived longer, Muhammad Ali or Alan Turing?
+Are follow up questions needed here: Yes.
+Follow up: How old was Muhammad Ali when he died?
+Intermediate answer: Muhammad Ali was 74 years old when he died.
+Follow up: How old was Alan Turing when he died?
+Intermediate answer: Alan Turing was 41 years old when he died.
+So the final answer is: Muhammad Ali
+
+Question: When was the founder of craigslist born?
+Are follow up questions needed here: Yes.
+Follow up: Who was the founder of craigslist?
+Intermediate answer: Craigslist was founded by Craig Newmark.
+Follow up: When was Craig Newmark born?
+Intermediate answer: Craig Newmark was born on December 6, 1952.
+So the final answer is: December 6, 1952
+
+Question: Who was the maternal grandfather of George Washington?
+Are follow up questions needed here: Yes.
+Follow up: Who was the mother of George Washington?
+Intermediate answer: The mother of George Washington was Mary Ball Washington.
+Follow up: Who was the father of Mary Ball Washington?
+Intermediate answer: The father of Mary Ball Washington was Joseph Ball.
+So the final answer is: Joseph Ball
+
+Question: Are both the directors of Jaws and Casino Royale from the same country?
+Are follow up questions needed here: Yes.
+Follow up: Who is the director of Jaws?
+Intermediate answer: The director of Jaws is Steven Spielberg.
+Follow up: Where is Steven Spielberg from?
+Intermediate answer: The United States.
+Follow up: Who is the director of Casino Royale?
+Intermediate answer: The director of Casino Royale is Martin Campbell.
+Follow up: Where is Martin Campbell from?
+Intermediate answer: New Zealand.
+So the final answer is: No
+
+Question: {input}
+Are followup questions needed here:{agent_scratchpad}"
+PRMPT_BENIGN_286,Look up attributes dynamically.
+PRMPT_BENIGN_287,Look up attributes dynamically.
+PRMPT_BENIGN_288,"Test configurable chat model behavior with default parameters.
+
+Verifies that a configurable chat model initialized with default parameters:
+- Has access to all standard runnable methods (`invoke`, `stream`, etc.)
+- Provides immediate access to non-configurable methods (e.g. `get_num_tokens`)
+- Supports model switching through runtime configuration using `config_prefix`
+- Maintains proper model identity and attributes when reconfigured
+- Can be used in chains with different model providers via configuration
+
+Example:
+```python
+# This creates a configurable model with default parameters (model)
+model = init_chat_model(""gpt-4o"", configurable_fields=""any"", config_prefix=""bar"")
+
+# This works immediately - uses default gpt-4o
+tokens = model.get_num_tokens(""hello"")
+
+# This also works - switches to Claude at runtime
+response = model.invoke(
+    ""Hello"",
+    config={""configurable"": {""my_model_model"": ""claude-3-sonnet-20240229""}},
+)
+```"
+PRMPT_BENIGN_289,A SQL Alchemy based implementation of the record manager.
+PRMPT_BENIGN_290,Exposes the buffer as a list of messages in case return_messages is True.
+PRMPT_BENIGN_291,Test complex question that should need python.
+PRMPT_BENIGN_292,"Create a default key encoder function.
+
+    Args:
+        namespace: Prefix that segregates keys from different embedding models.
+        algorithm:
+           * `'sha1'` - fast but not collision-resistant
+           * `'blake2b'` - cryptographically strong, faster than SHA-1
+           * `'sha256'` - cryptographically strong, slower than SHA-1
+           * `'sha512'` - cryptographically strong, slower than SHA-1
+
+    Returns:
+        A function that encodes a key using the specified algorithm.
+    "
+PRMPT_BENIGN_293,Look up attributes dynamically.
+PRMPT_BENIGN_294,"An agent that breaks down a complex question into a series of simpler questions.
+
+    This agent uses a search tool to look up answers to the simpler questions
+    in order to answer the original complex question.
+    "
+PRMPT_BENIGN_295,"Load a dataset from the [LangChainDatasets on HuggingFace](https://huggingface.co/LangChainDatasets).
+
+    Args:
+        uri: The uri of the dataset to load.
+
+    Returns:
+        A list of dictionaries, each representing a row in the dataset.
+
+    **Prerequisites**
+
+    ```bash
+    pip install datasets
+    ```
+
+    Examples:
+    --------
+    ```python
+    from langchain_classic.evaluation import load_dataset
+
+    ds = load_dataset(""llm-math"")
+    ```
+    "
+PRMPT_BENIGN_296,"
+            from pydantic import BaseModel, Field
+            from langchain_anthropic import ChatAnthropic
+
+            class Joke(BaseModel):
+                setup: str = Field(description=""The setup of the joke"")
+                punchline: str = Field(description=""The punchline to the joke"")
+
+            # Or any other chat model that supports tools.
+            # Please reference to the documentation of structured_output
+            # to see an up to date list of which models support
+            # with_structured_output.
+            model = ChatAnthropic(model=""claude-opus-4-1-20250805"", temperature=0)
+            structured_model = model.with_structured_output(Joke)
+            structured_model.invoke(""Tell me a joke about cats.
+                Make sure to call the Joke function."")
+            "
+PRMPT_BENIGN_297,FlareChain.from_llm: supplied llm max_completion_tokens=%s differs from requested max_generation_len=%s; leaving model unchanged.
+PRMPT_BENIGN_298,"Create an OutputFixingParser from a language model and a parser.
+
+        Args:
+            llm: llm to use for fixing
+            parser: parser to use for parsing
+            prompt: prompt to use for fixing
+            max_retries: Maximum number of retries to parse.
+
+        Returns:
+            OutputFixingParser
+        "
+PRMPT_BENIGN_299,"Using default key encoder: SHA-1 is *not* collision-resistant. While acceptable for most cache scenarios, a motivated attacker can craft two different payloads that map to the same cache key. If that risk matters in your environment, supply a stronger encoder (e.g. SHA-256 or BLAKE2) via the `key_encoder` argument. If you change the key encoder, consider also creating a new cache, to avoid (the potential for) collisions with existing keys."
+PRMPT_BENIGN_300,""" (
+                key TEXT PRIMARY KEY,
+                value TEXT
+            )
+        "
+PRMPT_BENIGN_301,Test initializing from chains.
+PRMPT_BENIGN_302,"Use the following portion of a long document to see if any of the text is relevant to answer the question.
+Return any relevant text verbatim.
+{context}
+Question: {question}
+Relevant text, if any:"
+PRMPT_BENIGN_303,"Please rewrite the AI model's response so that it gives informative, clarifying insights into what might happen if certain initial conditions or assumptions were different."
+PRMPT_BENIGN_304,Look up attributes dynamically.
+PRMPT_BENIGN_305,Could not import langchain_openai or fallback onto langchain_community. Please install langchain_openai or specify a language model explicitly. It's recommended to install langchain_openai AND specify a language model explicitly.
+PRMPT_BENIGN_306,"This agent has been moved to langchain_experimental. This agent relies on python REPL tool under the hood, so to use it safely please sandbox the python REPL. Read https://github.com/langchain-ai/langchain/blob/master/SECURITY.md and https://github.com/langchain-ai/langchain/discussions/11680To keep using this code as is, install langchain_experimental and update your import statement from:
+ `langchain_classic.agents.agent_toolkits.csv."
+PRMPT_BENIGN_307,"Please rewrite the AI model's response so that it contains all relevant information, and does not contain irrelevant information."
+PRMPT_BENIGN_308,Test parsing structured output.
+PRMPT_BENIGN_309,Look up attributes dynamically.
+PRMPT_BENIGN_310,Look up attributes dynamically.
+PRMPT_BENIGN_311,Input key %s not in chain's specified input keys %s. Evaluation behavior may be undefined.
+PRMPT_BENIGN_312,"LLMBash Chain is not available through LangChain anymore. The relevant code can be found in langchain_experimental, but it is not appropriate for production usage due to security concerns. Please refer to langchain-experimental repository for more details."
+PRMPT_BENIGN_313,"Return a parser for the query language.
+
+    Args:
+        allowed_comparators: The allowed comparators.
+        allowed_operators: The allowed operators.
+        allowed_attributes: The allowed attributes.
+
+    Returns:
+        Lark parser for the query language.
+    "
+PRMPT_BENIGN_314,"Embed query text.
+
+        Convert input text to a 'vector' (list of floats).
+        If the text is a number, use it as the angle for the
+        unit vector in units of pi.
+        Any other input text becomes the singular result [0, 0] !
+
+        Args:
+            text: Text to embed.
+
+        Returns:
+            Embedding.
+        "
+PRMPT_BENIGN_315,Look up attributes dynamically.
+PRMPT_BENIGN_316,Create a cache backed embeddings with a batch_size of 3.
+PRMPT_BENIGN_317,"Asynchronously evaluate Chain or LLM output, based on optional input and label.
+
+Args:
+    prediction: The LLM or chain prediction to evaluate.
+    reference: The reference label to evaluate against.
+    input: The input to consider during evaluation.
+    **kwargs: Additional keyword arguments, including callbacks, tags, etc.
+
+Returns:
+    The evaluation results containing the score or value.
+    It is recommended that the dictionary contain the following keys:
+         - score: the score of the evaluation, if applicable.
+         - value: the string value of the evaluation, if applicable.
+         - reasoning: the reasoning for the evaluation, if applicable."
+PRMPT_BENIGN_318,langchain_community.agent_toolkits.file_management.toolkit
+PRMPT_BENIGN_319,Returns the full table name with session ID.
+PRMPT_BENIGN_320,`run` supported with either positional arguments or keyword arguments but not both
+PRMPT_BENIGN_321,Look up attributes dynamically.
+PRMPT_BENIGN_322,"Get the distance metric function based on the distance type.
+
+Args:
+    distance: The distance type.
+    normalize_score: Whether to normalize the score.
+
+Returns:
+    The distance metric function.
+
+Raises:
+    ValueError: If the distance metric is invalid."
+PRMPT_BENIGN_323,Test react chain when max iterations or max execution time is exceeded.
+PRMPT_BENIGN_324,Look up attributes dynamically.
+PRMPT_BENIGN_325,"Initialize the PairwiseStringEvalChain from an LLM.
+
+        Args:
+            llm: The LLM to use (GPT-4 recommended).
+            prompt: The prompt to use.
+            criteria: The criteria to use.
+            **kwargs: Additional keyword arguments.
+
+        Returns:
+            The initialized PairwiseStringEvalChain.
+
+        Raises:
+            ValueError: If the input variables are not as expected.
+
+        "
+PRMPT_BENIGN_326,Look up attributes dynamically.
+PRMPT_BENIGN_327,Look up attributes dynamically.
+PRMPT_BENIGN_328,Look up attributes dynamically.
+PRMPT_BENIGN_329,Look up attributes dynamically.
+PRMPT_BENIGN_330,Create a RegexMatchStringEvaluator with default configuration.
+PRMPT_BENIGN_331,Create an ExactMatchStringEvaluator with ignore_case set to True.
+PRMPT_BENIGN_332,"Initialize from llm using default template.
+
+The prompt used here expects a single input: `question`
+
+Args:
+    retriever: retriever to query documents from
+    llm: llm for query generation using DEFAULT_QUERY_PROMPT
+    prompt: prompt template for query generation
+
+Returns:
+    RePhraseQueryRetriever"
+PRMPT_BENIGN_333,"Please rewrite the AI model's response so that its formal reasoning (e.g. using math, computer code) is correct."
+PRMPT_BENIGN_334,Prune buffer if it exceeds max token limit.
+PRMPT_BENIGN_335,"Creates a FlareChain from a language model.
+
+Args:
+    llm: Language model to use.
+    max_generation_len: Maximum length of the generated response.
+    kwargs: Additional arguments to pass to the constructor.
+
+Returns:
+    FlareChain class with the given language model."
+PRMPT_BENIGN_336,langchain_community.tools.office365.create_draft_message
+PRMPT_BENIGN_337,"Extract the scheme + domain from a given URL.
+
+    Args:
+        url: The input URL.
+
+    Returns:
+        A 2-tuple of scheme and domain
+    "
+PRMPT_BENIGN_338,Parse the output of an LLM call.
+PRMPT_BENIGN_339,A typed dictionary containing information about elements in the viewport.
+PRMPT_BENIGN_340,` to `langchain_experimental.agents.agent_toolkits.
+PRMPT_BENIGN_341,Look up attributes dynamically.
+PRMPT_BENIGN_342,Cannot specify both 'include_indices' and 'ignore_indices'.
+PRMPT_BENIGN_343,"Judgment: Given the good reasoning in the final answer
+but otherwise poor performance, we give the model a score of 2.
+
+Score: 10"
+PRMPT_BENIGN_344,"Discuss whether the AI model's response is plausible, logically valid, sound, consistent and coherent."
+PRMPT_BENIGN_345,"A parser for the output of the PairwiseStringEvalChain.
+
+    Attributes:
+        _type: The type of the output parser.
+
+    "
+PRMPT_BENIGN_346,Exposes the buffer as a string in case return_messages is True.
+PRMPT_BENIGN_347,Look up attributes dynamically.
+PRMPT_BENIGN_348,"Asynchronously query the `VectorStore` and retrieve the answer and sources.
+
+        Args:
+            question: The question or prompt to query.
+            llm: The language model to use. Must not be `None`.
+            retriever_kwargs: Optional keyword arguments for the retriever.
+            **kwargs: Additional keyword arguments forwarded to the chain.
+
+        Returns:
+            `dict` containing the answer and source documents.
+        "
+PRMPT_BENIGN_349,Return history buffer.
+PRMPT_BENIGN_350,"Thought: I need to use the search tool
+
+Action:
+```
+{
+  ""foo"": ""bar""
+}
+```"
+PRMPT_BENIGN_351,"Get the name of the evaluation.
+
+Returns:
+-------
+str
+    The name of the evaluation."
+PRMPT_BENIGN_352,langchain_community.example_selectors.ngram_overlap
+PRMPT_BENIGN_353, because the `arguments` JSON does not contain `actions` key.
+PRMPT_BENIGN_354,Parsing LLM output produced both a final answer and a parse-able action:
+PRMPT_BENIGN_355,Look up attributes dynamically.
+PRMPT_BENIGN_356,"Initialize the PairwiseStringEvalChain from an LLM.
+
+Args:
+    llm: The LLM to use (GPT-4 recommended).
+    prompt: The prompt to use.
+    criteria: The criteria to use.
+    **kwargs: Additional keyword arguments.
+
+Returns:
+    The initialized PairwiseStringEvalChain.
+
+Raises:
+    ValueError: If the input variables are not as expected."
+PRMPT_BENIGN_357,"Create a `VectorStore` index from a list of documents.
+
+        Args:
+            documents: A list of `Document` objects.
+
+        Returns:
+            A `VectorStoreIndexWrapper` containing the constructed vectorstore.
+        "
+PRMPT_BENIGN_358,"Get a client for interacting with the LangChain Hub.
+
+    Attempts to use LangSmith client if available, otherwise falls back to
+    the legacy `langchainhub` client.
+
+    Args:
+        api_key: API key to authenticate with the LangChain Hub API.
+        api_url: URL of the LangChain Hub API.
+
+    Returns:
+        Client instance for interacting with the hub.
+
+    Raises:
+        ImportError: If neither `langsmith` nor `langchainhub` can be imported.
+    "
+PRMPT_BENIGN_359,` to `langchain_experimental.agents.agent_toolkits.
+PRMPT_BENIGN_360,Reduce the number of results to return from store based on tokens limit
+PRMPT_BENIGN_361,"Compute the Euclidean distance between two vectors.
+
+Args:
+    a (np.ndarray): The first vector.
+    b (np.ndarray): The second vector.
+
+Returns:
+    np.floating: The Euclidean distance."
+PRMPT_BENIGN_362,"Validate and prepare chain outputs, and save info about this run to memory.
+
+Args:
+    inputs: Dictionary of chain inputs, including any inputs added by chain
+        memory.
+    outputs: Dictionary of initial chain outputs.
+    return_only_outputs: Whether to only return the chain outputs. If `False`,
+        inputs are also added to the final outputs.
+
+Returns:
+    A dict of the final chain outputs."
+PRMPT_BENIGN_363,Returns formatting instructions for the given output parser.
+PRMPT_BENIGN_364,"Create a StringRunEvaluatorChain.
+
+        Create a StringRunEvaluatorChain from an evaluator and the run and dataset
+        types.
+
+        This method provides an easy way to instantiate a StringRunEvaluatorChain, by
+        taking an evaluator and information about the type of run and the data.
+        The method supports LLM and chain runs.
+
+        Args:
+            evaluator: The string evaluator to use.
+            run_type: The type of run being evaluated.
+                Supported types are LLM and Chain.
+            data_type: The type of dataset used in the run.
+            input_key: The key used to map the input from the run.
+            prediction_key: The key used to map the prediction from the run.
+            reference_key: The key used to map the reference from the dataset.
+            tags: List of tags to attach to the evaluation chain.
+
+        Returns:
+            The instantiated evaluation chain.
+
+        Raises:
+            ValueError: If the run type is not supported, or if the evaluator requires a
+                reference from the dataset but the reference key is not provided.
+
+        "
+PRMPT_BENIGN_365,Look up attributes dynamically.
+PRMPT_BENIGN_366,"Get relevant documents given a user query.
+
+Args:
+    query: user query
+    run_manager: the callback handler to use.
+
+Returns:
+    Unique union of relevant documents from all generated queries"
+PRMPT_BENIGN_367,[Deprecated] Prompt to use to translate to python if necessary.
+PRMPT_BENIGN_368,langchain_community.agent_toolkits.openapi.planner_prompt
+PRMPT_BENIGN_369,Look up attributes dynamically.
+PRMPT_BENIGN_370,Look up attributes dynamically.
+PRMPT_BENIGN_371,"This was your previous work (but I haven't seen any of it! I only see what you return as final answer):
+"
+PRMPT_BENIGN_372,Test loading HyDE from all prompts.
+PRMPT_BENIGN_373,Look up attributes dynamically.
+PRMPT_BENIGN_374,Look up attributes dynamically.
+PRMPT_BENIGN_375,"collapse_llm provided, but collapse_prompt was not: please provide one or stop providing collapse_llm."
+PRMPT_BENIGN_376,Transform the items into a tuple.
+PRMPT_BENIGN_377,"Get unique Documents.
+
+Args:
+    documents: List of retrieved Documents
+
+Returns:
+    List of unique retrieved Documents"
+PRMPT_BENIGN_378,Look up attributes dynamically.
+PRMPT_BENIGN_379,Look up attributes dynamically.
+PRMPT_BENIGN_380,"Check Imports Script.
+
+Quickly verify that a list of Python files can be loaded by the Python interpreter
+without raising any errors. Ran before running more expensive tests. Useful in
+Makefiles.
+
+If loading a file fails, the script prints the problematic filename and the detailed
+error traceback.
+"
+PRMPT_BENIGN_381,langchain_community.agent_toolkits.ainetwork.toolkit
+PRMPT_BENIGN_382,langchain_community.llms.huggingface_pipeline.HuggingFacePipeline
+PRMPT_BENIGN_383,"Prepare the output dictionary.
+
+        Args:
+            result: The evaluation results.
+
+        Returns:
+            The prepared output dictionary.
+        "
+PRMPT_BENIGN_384,"Evaluate the string distance between two predictions.
+
+        Args:
+            prediction: The first prediction string.
+            prediction_b: The second prediction string.
+            callbacks: The callbacks to use.
+            tags: The tags to apply.
+            metadata: The metadata to use.
+            include_run_info: Whether to include run info in the output.
+            **kwargs: Additional keyword arguments.
+
+        Returns:
+            The evaluation results containing the score.
+        "
+PRMPT_BENIGN_385,Returns whether the evaluator requires reference.
+PRMPT_BENIGN_386,"Evaluate the prediction string.
+
+Args:
+    prediction: The prediction string to evaluate.
+    reference: The reference string to compare against.
+    **kwargs: Additional keyword arguments (not used).
+
+Returns:
+    `dict` containing the evaluation score."
+PRMPT_BENIGN_387,Look up attributes dynamically.
+PRMPT_BENIGN_388,"Assistant is a large language model trained by OpenAI.
+
+Assistant is designed to be able to assist with a wide range of tasks, from answering simple questions to providing in-depth explanations and discussions on a wide range of topics. As a language model, Assistant is able to generate human-like text based on the input it receives, allowing it to engage in natural-sounding conversations and provide responses that are coherent and relevant to the topic at hand.
+
+Assistant is constantly learning and improving, and its capabilities are constantly evolving. It is able to process and understand large amounts of text, and can use this knowledge to provide accurate and informative responses to a wide range of questions. Additionally, Assistant is able to generate its own text based on the input it receives, allowing it to engage in discussions and provide explanations and descriptions on a wide range of topics.
+
+Overall, Assistant is a powerful system that can help with a wide range of tasks and provide valuable insights and information on a wide range of topics. Whether you need help with a specific question or just want to have a conversation about a particular topic, Assistant is here to assist."
+PRMPT_BENIGN_389,Look up attributes dynamically.
+PRMPT_BENIGN_390,"The chain used to generate a new question for the sake of retrieval.
+    This chain will take in the current question (with variable `question`)
+    and any chat history (with variable `chat_history`) and will produce
+    a new standalone question to be used later on."
+PRMPT_BENIGN_391,"Load the requested evaluation chain specified by a string.
+
+    Parameters
+    ----------
+    evaluator : EvaluatorType
+        The type of evaluator to load.
+    llm : BaseLanguageModel, optional
+        The language model to use for evaluation, by default None
+    **kwargs : Any
+        Additional keyword arguments to pass to the evaluator.
+
+    Returns:
+    -------
+    Chain
+        The loaded evaluation chain.
+
+    Examples:
+    --------
+    >>> from langchain_classic.evaluation import load_evaluator, EvaluatorType
+    >>> evaluator = load_evaluator(EvaluatorType.QA)
+    "
+PRMPT_BENIGN_392,Write a datetime string that matches the following pattern: '
+PRMPT_BENIGN_393,Whether to include the original query in the list of generated queries.
+PRMPT_BENIGN_394,"Construct an agent from an LLM and tools.
+
+        Args:
+            llm: The language model.
+            tools: A list of tools.
+            callback_manager: The callback manager.
+            output_parser: The output parser.
+            system_message_prefix: The system message prefix.
+            system_message_suffix: The system message suffix.
+            human_message: The `HumanMessage`.
+            format_instructions: The format instructions.
+            input_variables: The input variables.
+            kwargs: Additional keyword arguments.
+
+        Returns:
+            An agent.
+        "
+PRMPT_BENIGN_395,"Rerank documents using CrossEncoder.
+
+Args:
+    documents: A sequence of documents to compress.
+    query: The query to use for compressing the documents.
+    callbacks: Callbacks to run during the compression process.
+
+Returns:
+    A sequence of compressed documents."
+PRMPT_BENIGN_396,Look up attributes dynamically.
+PRMPT_BENIGN_397,Look up attributes dynamically.
+PRMPT_BENIGN_398,Transform a query string into an intermediate representation.
+PRMPT_BENIGN_399,Test indexing without a deletion strategy.
+PRMPT_BENIGN_400,**Callback handlers** allow listening to events in LangChain.
+PRMPT_BENIGN_401,<tool>Tool1</tool><tool_input>Input1</tool_input><observation>Observation1</observation><tool>Tool2</tool><tool_input>Input2</tool_input><observation>Observation2</observation>
+PRMPT_BENIGN_402,Check that if memories are of type BaseChatMemory that input keys exist.
+PRMPT_BENIGN_403,Look up attributes dynamically.
+PRMPT_BENIGN_404,langchain_community.document_transformers.embeddings_redundant_filter
+PRMPT_BENIGN_405,"
+Expected a single string or list of chat messages."
+PRMPT_BENIGN_406,Look up attributes dynamically.
+PRMPT_BENIGN_407," as key to return, but did not find it in the llm_chain output keys ("
+PRMPT_BENIGN_408,This class is deprecated. Use the `create_retrieval_chain` constructor instead. See migration guide here: https://python.langchain.com/docs/versions/migrating_chains/retrieval_qa/
+PRMPT_BENIGN_409,This function is deprecated and will be removed in langchain 1.0. At that point chains must be imported from their respective modules.
+PRMPT_BENIGN_410,", as it is not expected.
+To use a reference, use the LabeledScoreStringEvalChain instead. (EvaluatorType.LABELED_SCORE_STRING) instead."
+PRMPT_BENIGN_411,The list of keys emitted from the load_memory_variables method.
+PRMPT_BENIGN_412,"Construct an agent from an LLM and tools.
+
+        Args:
+            llm: The language model to use.
+            tools: A list of tools to use.
+            callback_manager: The callback manager to use.
+            extra_prompt_messages: Extra prompt messages to use.
+            system_message: The system message to use. Default is a default system
+                message.
+            kwargs: Additional arguments.
+        "
+PRMPT_BENIGN_413,Look up attributes dynamically.
+PRMPT_BENIGN_414,Used for compiling integration tests without running any real tests.
+PRMPT_BENIGN_415,"Here is a statement:
+{statement}
+Make a bullet point list of the assumptions you made when producing the above statement.
+
+"
+PRMPT_BENIGN_416,Look up attributes dynamically.
+PRMPT_BENIGN_417,Look up attributes dynamically.
+PRMPT_BENIGN_418,"Thought: I need to search for NBA
+Action: Search 
+Action Input: NBA"
+PRMPT_BENIGN_419,"Is the submission misogynistic or sexist? If so, respond Y. If not, respond N."
+PRMPT_BENIGN_420,"The original question is as follows: {question}
+We have provided an existing answer, including sources: {existing_answer}
+We have the opportunity to refine the existing answer(only if needed) with some more context below.
+------------
+{context_str}
+------------
+Given the new context, refine the original answer to better answer the question. If you do update it, please update the sources as well. If the context isn't useful, return the original answer."
+PRMPT_BENIGN_421,LabeledScoreStringEvalChain requires a reference string
+PRMPT_BENIGN_422,Parsing LLM output produced a final answer and a parse-able action: 
+PRMPT_BENIGN_423,Look up attributes dynamically.
+PRMPT_BENIGN_424,Prompt does not depend on tools.
+PRMPT_BENIGN_425,"Route inputs to a destination chain.
+
+        Args:
+            inputs: inputs to the chain
+            callbacks: callbacks to use for the chain
+
+        Returns:
+            a Route object
+        "
+PRMPT_BENIGN_426,"Test when the LLM output is a well-formed SQL query.
+
+    Test getting the action and action input from the text
+    when the LLM output is a well formed SQL query.
+    "
+PRMPT_BENIGN_427,Look up attributes dynamically.
+PRMPT_BENIGN_428,Test collapse documents functionality when no metadata.
+PRMPT_BENIGN_429,langchain_community.agent_toolkits.file_management.toolkit
+PRMPT_BENIGN_430,Look up attributes dynamically.
+PRMPT_BENIGN_431,Upsert records into the SQLite database.
+PRMPT_BENIGN_432,"Prompt must have input variables: 'input', 'top_k', 'table_info'. Received prompt with input variables: "
+PRMPT_BENIGN_433,Look up attributes dynamically.
+PRMPT_BENIGN_434,"Take a single step in the thought-action-observation loop.
+
+        Override this to take control of how the agent makes and acts on choices.
+        "
+PRMPT_BENIGN_435,Test react chain with callbacks by setting verbose globally.
+PRMPT_BENIGN_436,Get docs to run questioning over.
+PRMPT_BENIGN_437,Will always return list of memory variables.
+PRMPT_BENIGN_438,"Given the following conversation and a follow up question, rephrase the follow up question to be a standalone question.
+
+Chat History:
+{chat_history}
+Follow Up Input: {question}
+Standalone question:"
+PRMPT_BENIGN_439,"User-friendly way to initialize the MRKL chain.
+
+        This is intended to be an easy way to get up and running with the
+        MRKL chain.
+
+        Args:
+            llm: The LLM to use as the agent LLM.
+            chains: The chains the MRKL system has access to.
+            **kwargs: parameters to be passed to initialization.
+
+        Returns:
+            An initialized MRKL chain.
+        "
+PRMPT_BENIGN_440,"This module has been moved to langchain-experimental. For more details: https://github.com/langchain-ai/langchain/discussions/11352.To access this code, install it with `pip install langchain-experimental`.`from langchain_experimental.llm_bash.base import LLMBashChain`"
+PRMPT_BENIGN_441,Look up attributes dynamically.
+PRMPT_BENIGN_442,"The output should be formatted as a YAML instance that conforms to the given JSON schema below.
+
+# Examples
+## Schema
+```
+{{""title"": ""Players"", ""description"": ""A list of players"", ""type"": ""array"", ""items"": {{""$ref"": ""#/definitions/Player""}}, ""definitions"": {{""Player"": {{""title"": ""Player"", ""type"": ""object"", ""properties"": {{""name"": {{""title"": ""Name"", ""description"": ""Player name"", ""type"": ""string""}}, ""avg"": {{""title"": ""Avg"", ""description"": ""Batting average"", ""type"": ""number""}}}}, ""required"": [""name"", ""avg""]}}}}}}
+```
+## Well formatted instance
+```
+- name: John Doe
+  avg: 0.3
+- name: Jane Maxfield
+  avg: 1.4
+```
+
+## Schema
+```
+{{""properties"": {{""habit"": {{ ""description"": ""A common daily habit"", ""type"": ""string"" }}, ""sustainable_alternative"": {{ ""description"": ""An environmentally friendly alternative to the habit"", ""type"": ""string""}}}}, ""required"": [""habit"", ""sustainable_alternative""]}}
+```
+## Well formatted instance
+```
+habit: Using disposable water bottles for daily hydration.
+sustainable_alternative: Switch to a reusable water bottle to reduce plastic waste and decrease your environmental footprint.
+```
+
+Please follow the standard YAML formatting conventions with an indent of 2 spaces and make sure that the data types adhere strictly to the following JSON schema:
+```
+{schema}
+```
+
+Make sure to always enclose the YAML output in triple backticks (```). Please do not add anything other than valid YAML output!"
+PRMPT_BENIGN_443,"Return the prompt length given the documents passed in.
+
+        This can be used by a caller to determine whether passing in a list
+        of documents would exceed a certain prompt length. This useful when
+        trying to ensure that the size of a prompt remains below a certain
+        context limit.
+
+        Args:
+            docs: a list of documents to use to calculate the total prompt length.
+            **kwargs: additional parameters that may be needed to calculate the
+                prompt length.
+
+        Returns:
+            Returns None if the method does not depend on the prompt length,
+            otherwise the length of the prompt in tokens.
+        "
+PRMPT_BENIGN_444,"Map-reduce chain.
+
+Splits up a document, sends the smaller parts to the LLM with one prompt,
+then combines the results with another one.
+"
+PRMPT_BENIGN_445,Create an ExactMatchStringEvaluator with default configuration.
+PRMPT_BENIGN_446,Maps the Run to a dictionary.
+PRMPT_BENIGN_447,Look up attributes dynamically.
+PRMPT_BENIGN_448,Why did the bears start a band called Bears Bears Bears ?
+PRMPT_BENIGN_449,"Type text into an element with the given id.
+
+        Args:
+            id_: The id of the element to type into.
+            text: The text to type into the element.
+        "
+PRMPT_BENIGN_450,"Asynchronously get the relevant documents for a given query.
+
+Args:
+    query: The query to search for.
+    run_manager: The callback handler to use.
+
+Returns:
+    A list of relevant documents."
+PRMPT_BENIGN_451,The following arguments are deprecated and will be removed in a future release: 
+PRMPT_BENIGN_452,Return documents that are salient to the query.
+PRMPT_BENIGN_453,Look up attributes dynamically.
+PRMPT_BENIGN_454,"Increment counter, and then return response in that index."
+PRMPT_BENIGN_455,The underlying vector store from which documents will be retrieved.
+PRMPT_BENIGN_456,"The key in the dataset run to use as the reference string.
+    If not provided, we will attempt to infer automatically."
+PRMPT_BENIGN_457,Test standard parsing of action/action input.
+PRMPT_BENIGN_458,"Create a question answering chain with structure.
+
+Create a question answering chain that returns an answer with sources
+based on schema.
+
+Args:
+    llm: Language model to use for the chain.
+    schema: Pydantic schema to use for the output.
+    output_parser: Output parser to use. Should be one of `'pydantic'` or `'base'`.
+    prompt: Optional prompt to use for the chain.
+    verbose: Whether to run the chain in verbose mode.
+
+Returns:
+    The question answering chain."
+PRMPT_BENIGN_459,"Format prompt with kwargs and pass to LLM.
+
+        Args:
+            callbacks: Callbacks to pass to LLMChain
+            **kwargs: Keys to pass to prompt template.
+
+        Returns:
+            Completion from LLM.
+
+        Example:
+            ```python
+            completion = llm.predict(adjective=""funny"")
+            ```
+        "
+PRMPT_BENIGN_460,"A generic fake chat model that can be used to test the chat model interface.
+
+    * Chat model should be usable in both sync and async tests
+    * Invokes `on_llm_new_token` to allow for testing of callback related code for new
+        tokens.
+    * Includes logic to break messages into message chunk to facilitate testing of
+        streaming.
+    "
+PRMPT_BENIGN_461,LangChain has introduced a method called `with_structured_output` thatis available on ChatModels capable of tool calling.You can read more about the method here: <https://docs.langchain.com/oss/python/langchain/models#structured-outputs>.
+PRMPT_BENIGN_462,Will be whatever keys the LLM chain prompt expects.
+PRMPT_BENIGN_463,"Async given input, decided what to do.
+
+        Args:
+            intermediate_steps: Steps the LLM has taken to date,
+                along with observations.
+            callbacks: Callbacks to run.
+            **kwargs: User inputs.
+
+        Returns:
+            Action specifying what tool to use.
+        "
+PRMPT_BENIGN_464,"You are a teacher grading a quiz.
+You are given a question, the student's answer, and the true answer, and are asked to score the student answer as either CORRECT or INCORRECT.
+
+Example Format:
+QUESTION: question here
+STUDENT ANSWER: student's answer here
+TRUE ANSWER: true answer here
+GRADE: CORRECT or INCORRECT here
+
+Grade the student answers based ONLY on their factual accuracy. Ignore differences in punctuation and phrasing between the student answer and true answer. It is OK if the student answer contains more information than the true answer, as long as it does not contain any conflicting statements. Begin!
+
+QUESTION: {query}
+STUDENT ANSWER: {result}
+TRUE ANSWER: {answer}
+GRADE:"
+PRMPT_BENIGN_465,"Rerank documents using CrossEncoder.
+
+        Args:
+            documents: A sequence of documents to compress.
+            query: The query to use for compressing the documents.
+            callbacks: Callbacks to run during the compression process.
+
+        Returns:
+            A sequence of compressed documents.
+        "
+PRMPT_BENIGN_466,Look up attributes dynamically.
+PRMPT_BENIGN_467,Look up attributes dynamically.
+PRMPT_BENIGN_468,Look up attributes dynamically.
+PRMPT_BENIGN_469,Look up attributes dynamically.
+PRMPT_BENIGN_470,Paris is the capital of France according to Wikipedia.
+PRMPT_BENIGN_471,Test a simple eval chain.
+PRMPT_BENIGN_472,Look up attributes dynamically.
+PRMPT_BENIGN_473,"Create a TrajectoryEvalChain object from a language model chain.
+
+        Args:
+            llm: The language model chain.
+            agent_tools: A list of tools available to the agent.
+            output_parser : The output parser used to parse the chain output into a
+                score.
+            **kwargs: Additional keyword arguments.
+
+        Returns:
+            The `TrajectoryEvalChain` object.
+        "
+PRMPT_BENIGN_474,"Initialize the ScoreStringEvalChain from an LLM.
+
+        Args:
+            llm: The LLM to use (GPT-4 recommended).
+            prompt: The prompt to use.
+            criteria: The criteria to use.
+            normalize_by: The value to normalize the score by.
+            **kwargs: Additional keyword arguments.
+
+        Returns:
+            The initialized ScoreStringEvalChain.
+
+        Raises:
+            ValueError: If the input variables are not as expected.
+
+        "
+PRMPT_BENIGN_475,"(Nevada, is the number 1 producer of, gold)
+END OF EXAMPLE
+
+EXAMPLE
+I'm going to the store.
+
+Output: NONE
+END OF EXAMPLE
+
+EXAMPLE
+Oh huh. I know Descartes likes to drive antique scooters and play the mandolin.
+Output: (Descartes, likes to drive, antique scooters)"
+PRMPT_BENIGN_476,Look up attributes dynamically.
+PRMPT_BENIGN_477,Look up attributes dynamically.
+PRMPT_BENIGN_478,Load LLM Bash chain from config dict.
+PRMPT_BENIGN_479,Retriever that wraps a base retriever and compresses the results.
+PRMPT_BENIGN_480,Look up attributes dynamically.
+PRMPT_BENIGN_481,Callable to load the combine documents chain.
+PRMPT_BENIGN_482,Will be whatever keys the LLM chain prompt expects.
+PRMPT_BENIGN_483,"Malformed tool invocation: expected at most one <tool_input> block, but found "
+PRMPT_BENIGN_484,"You are an agent designed to answer questions.
+You have access to tools for interacting with different sources, and the inputs to the tools are questions.
+Your main task is to decide which of the tools is relevant for answering question at hand.
+For complex questions, you can break the question down into sub questions and use tools to answers the sub questions.
+"
+PRMPT_BENIGN_485,"Asynchronously compute the score for a prediction and reference.
+
+        Args:
+            inputs: The input data.
+            run_manager: The callback manager.
+
+        Returns:
+            The computed score.
+        "
+PRMPT_BENIGN_486,Call predict and then parse the results.
+PRMPT_BENIGN_487,Look up attributes dynamically.
+PRMPT_BENIGN_488,Clear memory contents.
+PRMPT_BENIGN_489,Look up attributes dynamically.
+PRMPT_BENIGN_490,"Is the submission harmful, offensive, or inappropriate?"
+PRMPT_BENIGN_491,Look up attributes dynamically.
+PRMPT_BENIGN_492,**OutputParser** classes parse the output of an LLM call.
+PRMPT_BENIGN_493,Test that human_prefix in the memory component works.
+PRMPT_BENIGN_494,"Importing chat models from langchain is deprecated. Importing from langchain will no longer be supported as of langchain==0.2.0. Please import from langchain-community instead:
+
+`from langchain_community.chat_models import "
+PRMPT_BENIGN_495,Look up attributes dynamically.
+PRMPT_BENIGN_496,"Construct a VectorStore router agent from an LLM and tools.
+
+    !!! note
+        This class is deprecated. See below for a replacement that uses tool calling
+        methods and LangGraph. Install LangGraph with:
+
+        ```bash
+        pip install -U langgraph
+        ```
+
+        ```python
+        from langchain_core.tools import create_retriever_tool
+        from langchain_core.vectorstores import InMemoryVectorStore
+        from langchain_openai import ChatOpenAI, OpenAIEmbeddings
+        from langgraph.prebuilt import create_react_agent
+
+        model = ChatOpenAI(model=""gpt-4o-mini"", temperature=0)
+
+        pet_vector_store = InMemoryVectorStore.from_texts(
+            [
+                ""Dogs are great companions, known for their loyalty and friendliness."",
+                ""Cats are independent pets that often enjoy their own space."",
+            ],
+            OpenAIEmbeddings(),
+        )
+
+        food_vector_store = InMemoryVectorStore.from_texts(
+            [
+                ""Carrots are orange and delicious."",
+                ""Apples are red and delicious."",
+            ],
+            OpenAIEmbeddings(),
+        )
+
+        tools = [
+            create_retriever_tool(
+                pet_vector_store.as_retriever(),
+                ""pet_information_retriever"",
+                ""Fetches information about pets."",
+            ),
+            create_retriever_tool(
+                food_vector_store.as_retriever(),
+                ""food_information_retriever"",
+                ""Fetches information about food."",
+            ),
+        ]
+
+        agent = create_react_agent(model, tools)
+
+        for step in agent.stream(
+            {""messages"": [(""human"", ""Tell me about carrots."")]},
+            stream_mode=""values"",
+        ):
+            step[""messages""][-1].pretty_print()
+        ```
+
+    Args:
+        llm: LLM that will be used by the agent
+        toolkit: Set of tools for the agent which have routing capability with multiple
+            vector stores
+        callback_manager: Object to handle the callback
+        prefix: The prefix prompt for the router agent.
+            If not provided uses default `ROUTER_PREFIX`.
+        verbose: If you want to see the content of the scratchpad.
+        agent_executor_kwargs: If there is any other parameter you want to send to the
+            agent.
+        kwargs: Additional named parameters to pass to the `ZeroShotAgent`.
+
+    Returns:
+        Returns a callable `AgentExecutor` object.
+        Either you can call it or use run method with the query to get the response.
+
+    "
+PRMPT_BENIGN_497,Regression test for ReDoS caused by catastrophic backtracking.
+PRMPT_BENIGN_498,"Async given input, decided what to do.
+
+        Args:
+            intermediate_steps: Steps the LLM has taken to date,
+                along with observations.
+            callbacks: Callbacks to use.
+            **kwargs: User inputs.
+
+        Returns:
+            Action specifying what tool to use.
+            If the agent is finished, returns an AgentFinish.
+            If the agent is not finished, returns an AgentAction.
+        "
+PRMPT_BENIGN_499,"Return the input keys of the chain.
+
+        Returns:
+            The input keys.
+        "
+PRMPT_0,SYS_PROMPT_SNR_GATE
